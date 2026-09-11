@@ -1,0 +1,170 @@
+{
+  "id": "UUOTWEPXKxJ6C5pr",
+  "name": "My workflow",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-09T19:28:45.459Z",
+  "updatedAt": "2026-09-09T19:44:44.273Z",
+  "isArchived": false,
+  "versionId": "77fbb6af-8a7a-4945-9bf1-ae1cd4edec9c",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6b142c78-b6de-4503-be9d-849e8a28f4ea",
+      "name": "When chat message received",
+      "webhookId": "fb863f56-45c6-456c-9f78-9506c5c3a28b"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5ece51e5-6fc9-44e3-959e-bc29e0ac4495",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen3:4b",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "id": "c95fd926-2b87-4984-9911-94d252def9f1",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "VqdwS233OHtpZtnu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "588062764",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "2e4ccba3-1fec-4baf-b14e-df8c782f9edc",
+      "name": "Send a text message",
+      "webhookId": "47cc12d8-79c2-4587-acd0-28ee7a4d2ebf",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.6,
+      "position": [
+        464,
+        256
+      ],
+      "id": "9a92ebc8-c236-4904-8796-5de3583ed934",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "5NS1D9tzoWKw4XNC",
+          "name": "Redis account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "UUOTWEPXKxJ6C5pr",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "createdAt": "2026-09-09T19:28:45.459Z",
+      "updatedAt": "2026-09-09T19:28:45.459Z"
+    }
+  ],
+  "activeVersion": null
+}
