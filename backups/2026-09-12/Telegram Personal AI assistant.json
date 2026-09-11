@@ -1,0 +1,466 @@
+{
+  "id": "VEBgVGBQxkjRopuc",
+  "name": "Telegram Personal AI assistant",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-09T13:44:31.431Z",
+  "updatedAt": "2026-09-09T15:14:25.891Z",
+  "isArchived": true,
+  "versionId": "efbbca84-e78d-4bca-b7bf-98456b489ad9",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "a670c869-d2b8-4b34-a6ed-46194881f99f",
+      "name": "Listen for incoming events",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -1792,
+        80
+      ],
+      "webhookId": "0474fc6c-1a7d-4a9d-bc34-54b3257ad414",
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "allow_1",
+              "name": "allow",
+              "type": "string",
+              "value": "588062764"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3b85e656-abc0-474c-8c9b-6e99d4ffaf36",
+      "name": "AllowList",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1568,
+        80
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "auth_check",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+              "rightValue": "={{ $json.allow }}"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "d3c0036e-f9b7-4e03-b867-8b9eef937d9c",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1344,
+        80
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "text",
+              "stringValue": "={{ $('Listen for incoming events').item.json.message.text || '' }}"
+            },
+            {
+              "name": "sessionId",
+              "stringValue": "={{ $('Listen for incoming events').item.json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "34a99231-9b7c-4557-a9e9-381dc93ace64",
+      "name": "Voice or Text",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1120,
+        80
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "voice_check",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Listen for incoming events').item.json.message.text }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b4664241-b9d5-4a1d-85e8-2ea15d5676e2",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -896,
+        80
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Listen for incoming events').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "4aa0f6a9-e7f6-4694-8f84-94bd9f202675",
+      "name": "Get Voice File",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -672,
+        16
+      ],
+      "webhookId": "7731f83c-2346-4983-8916-c1360836de7d",
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "bintang_session_default",
+        "contextWindowLength": 10
+      },
+      "id": "dcd423d9-a093-43c5-9c7a-36e409b9545e",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        16,
+        256
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events').first().json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "676ffe0e-1911-42b3-af4c-7029d30f9344",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1008,
+        80
+      ],
+      "webhookId": "40027a52-0dce-4542-a6ec-496040e9d094",
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {}
+      },
+      "id": "f19df1fc-4e4a-48e7-9d03-7bb61bf3ddfb",
+      "name": "Get many messages in Gmail",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        416,
+        208
+      ],
+      "webhookId": "48dd8198-8fd5-4cfc-897c-72cbc15d319f",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text ? $json.text : $json.content.parts[0].text }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=Kamu adalah asisten personal yang membantu dan selalu menjawab dalam bahasa yang digunakan oleh orang yang berbicara denganmu. Gunakan kata ganti aku untuk menyebut dirimu.\n\n\n## LLM\nKamu menggunakan **LLM** ketika tidak ada pertanyaan yang berhubungan dengan kalender atau laporan belanja/pengeluaran. Pesan akan dikirim ke Telegram, jadi sesuaikan format penulisannya. Jangan gunakan markdown format ketika membalas. Jawaban singkat ≤200 kata.\n\nINFORMASI WAKTU:\n- Waktu sekarang: {{ $now }}\n- Tanggal hari ini: {{ $today.format('dd MMMM yyyy') }}\n\n## Laporan Pengeluaran\n\nJika user input laporan belanja atau pengeluaran maka Kamu adalah parser text belanja yang mengubah input text fleksibel menjadi format terstruktur.\n\nTUGAS: Analisa text belanja dan ubah menjadi format PERSIS seperti ini:\n\nTOKO: [nama toko dari text, jika tidak ada tulis 'Manual Input']\nTOTAL: [total harga dalam angka saja tanpa Rp/ribu/rb]\nITEMS: [daftar barang yang dibeli dengan kuantitas]\nTANGGAL: {{ $now.format('yyyy-MM-dd') }}\n\nCONTOH:\nInput: \"beli Telur 1kg Rp 20rb di Toko Mbak Ita\"\nOutput:\nTOKO: Toko Mbak Ita\nTOTAL: 20000\nITEMS: Telur 1kg\nTANGGAL: 2025-06-19\n\nInput: \"beli susu ultra 2 botol sama roti tawar 15 ribu\"\nOutput:\nTOKO: Manual Input\nTOTAL: 15000\nITEMS: Susu Ultra 2 botol, Roti Tawar\nTANGGAL: 2025-06-19\n\n## Laporan Keuangan\n\nKamu adalah asisten laporan keuangan jika user mengetik /laporan.\n\nINFORMASI WAKTU:\n- Waktu sekarang: {{ $now }}\n- Tanggal hari ini: {{ $today.format('yyyy-MM-dd') }}\n\nTUGAS:\n1. Analisa permintaan user untuk laporan pengeluaran\n2. Gunakan tool \"catatan_keuangan\" untuk ambil data catatan pengeluaran\n3. Filter data sesuai periode yang diminta:\n   - \"hari ini\" → data tanggal hari ini\n   - \"minggu ini\" → data tanggal 1 minggu terakhir\n   - \"bulan ini\" → data dalam bulan ini\n4. Hitung total pengeluaran dan jumlah transaksi\n5. Format laporan yang rapi dalam bahasa Indonesia\n\nSTRUKTUR DATA SHEETS:\n- Kolom A: Toko\n- Kolom B: Total (dalam rupiah)\n- Kolom C: Items \n- Kolom D: Tanggal Struk\n- Kolom E: Tanggal Input\n- Kolom F: Waktu Input\n\nFORMAT LAPORAN:\n📊 *Laporan Pengeluaran [Periode]*\n📅 [Rentang Tanggal]\n\n💰 *Total Pengeluaran:* Rp [total pengeluaran]\n🛒 *Jumlah Transaksi:* [jumlah] kali\n\n📋 *Detail Transaksi:*\n--\n📅 *[Tanggal]*\n📝 *[Toko]:* [Items]\n💵 *Pengeluaran:* Rp [amount]\n--\n\nPENTING: \n- Urutkan transaksi berdasarkan tanggal (terbaru ke terlama)\n- Gunakan format tanggal dd-mmm-yy (13 Sep 2025)\n- Gunakan format mata uang Indonesia (Rp 43.500)\n- Setiap detail transaksi dipisah dengan garis \"--\"\n- Gunakan emoji sesuai format di atas\n\nJika tidak ada data untuk periode tersebut, beri pesan ramah bahwa belum ada transaksi.\n\n\n## Kalender\n- Sesuaikan konteks penggunaan dan penjadwalan kalender, jika berkaitan dengan personal (jalan, nyantai, ngopi, dan lainnya) maka gunakan personal, jika berkaitan pendidikan atau edukasi maka gunakan education, jika berkaitan kerjaan maka gunakan work.\n- Jangan minta user tentang ID acaranya jika kamu tidak tahu, cek sendiri di semua kalender sampai ketemu yang cocok.\n- Jika diminta untuk membuat acara, gunakan createEvent\n- Jika sebuah acara harus dihapus, gunakan deleteEvent \n- Jika diminta informasi tentang sebuah acara atau tanggal tertentu, gunakan getEvent  \n- Jika sesuatu perlu diperbarui, gunakan updateEvent"
+        }
+      },
+      "id": "67af71f3-0dc6-44c9-9f9f-b24960a5abf7",
+      "name": "AI Assistant",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        16
+      ],
+      "id": "20b29aca-fdf8-4148-b5cb-d8bf34ec92fa",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QVYkHlJCbUcVHNDj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        208
+      ],
+      "id": "593d1995-059d-425f-8be4-04854a196f16",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QVYkHlJCbUcVHNDj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        0,
+        352
+      ],
+      "id": "82f9c9c6-0404-46c0-9642-edea1004e0e9",
+      "name": "Ollama Chat Model"
+    }
+  ],
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Voice or Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AllowList": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Assistant",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice or Text": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Voice File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Assistant",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen for incoming events": {
+      "main": [
+        [
+          {
+            "node": "AllowList",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Assistant": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Assistant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Assistant",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Assistant",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "VEBgVGBQxkjRopuc",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "createdAt": "2026-09-09T13:44:31.431Z",
+      "updatedAt": "2026-09-09T13:44:31.431Z"
+    }
+  ],
+  "activeVersion": null
+}
