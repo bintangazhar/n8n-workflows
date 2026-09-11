@@ -1,0 +1,257 @@
+{
+  "id": "uKWIxU8OzyuWiYe4",
+  "name": "Weekly n8n Workflow Backup",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-11T22:51:23.919Z",
+  "updatedAt": "2026-09-11T23:03:21.959Z",
+  "isArchived": false,
+  "versionId": "79debcf0-17fc-45e3-ad9c-c9f71b8163b2",
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "00bf2ba6-cb9b-46f3-a084-d71ba7990ab2",
+      "name": "Every Monday 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.bintang.me/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "250"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a6ce4625-aaac-472b-a278-2640354296b6",
+      "name": "Get All Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oAKTg416qzwkR3Sw",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflows = $input.first().json.data;\nconst dateStr = $now.toFormat('yyyy-MM-dd');\nconst fileName = `n8n-backup-${dateStr}.json`;\nconst content = JSON.stringify(workflows, null, 2);\nreturn [{ json: { fileName, content, count: workflows.length, dateStr } }];\n"
+      },
+      "id": "ff3cdee7-e3b1-4234-930f-3e218f66682b",
+      "name": "Prepare Backup File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "bintangazhar",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "name"
+        },
+        "filePath": "={{ \"backups/\" + $json.fileName }}",
+        "fileContent": "={{ $json.content }}",
+        "commitMessage": "={{ \"Weekly n8n backup - \" + $json.dateStr }}"
+      },
+      "id": "8cc5137a-a5a8-445b-b8c8-ef3a84c9c93e",
+      "name": "Commit Backup to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        208
+      ],
+      "webhookId": "ed38cf35-b3d0-4def-837f-a89277c65844",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "0SHYJ4ymiz5FIiJV",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "convertAllData": false,
+        "sourceKey": "content",
+        "options": {
+          "fileName": "={{ $json.fileName }}",
+          "keepSource": true,
+          "mimeType": "application/json",
+          "useRawData": true
+        }
+      },
+      "id": "411f7422-d76e-4957-a3a4-9f3ba6545c58",
+      "name": "Convert to Binary",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "53163760-ea08-43a1-b812-68b8baef8cc1",
+      "name": "Upload Backup to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1152,
+        432
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Weekly n8n Backup\n\n1. Isi kredensial: n8n API (Header Auth: X-N8N-API-KEY), GitHub (Access Token), Google Drive (OAuth2)\n2. Ganti owner/repository GitHub sesuai repo backup kamu\n3. Ganti folderId Google Drive jika ingin folder khusus (bukan root)\n4. URL n8n API di node \"Get All Workflows\" sudah otomatis pakai domain instance ini",
+        "height": 384,
+        "color": 5
+      },
+      "id": "12a82157-fa78-445f-b079-14b98511b7f9",
+      "name": "Sticky Note 4df85f41",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        176
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 07:00": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "Prepare Backup File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Backup File": {
+      "main": [
+        [
+          {
+            "node": "Commit Backup to GitHub",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert to Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Binary": {
+      "main": [
+        [
+          {
+            "node": "Upload Backup to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "uKWIxU8OzyuWiYe4",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "createdAt": "2026-09-11T22:51:23.919Z",
+      "updatedAt": "2026-09-11T22:51:23.919Z"
+    }
+  ],
+  "activeVersion": null
+}
