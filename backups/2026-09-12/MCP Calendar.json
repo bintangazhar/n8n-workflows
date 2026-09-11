@@ -1,0 +1,520 @@
+{
+  "id": "mxJ4s09jzbeKX28p",
+  "name": "MCP Calendar",
+  "description": null,
+  "active": true,
+  "activeVersionId": "ce1e4dcb-fbae-4a24-9dbd-17b812b12593",
+  "createdAt": "2026-09-09T18:21:35.491Z",
+  "updatedAt": "2026-09-11T22:42:51.875Z",
+  "isArchived": false,
+  "versionId": "ce1e4dcb-fbae-4a24-9dbd-17b812b12593",
+  "versionCounter": 69,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "calendar"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        384
+      ],
+      "id": "5906b6ad-9afa-4af1-9d7c-80af7a4b7f91",
+      "name": "MCP Server Trigger",
+      "webhookId": "daa62896-db84-45b4-9c37-f0d757d2f488"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com, Birthdays=addressbook#contacts@group.v.calendar.google.com (read-only, from Contacts). Default Personal.', 'string') }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $fromAI('Event_ID', 'Google Calendar event ID to retrieve details for', 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        624
+      ],
+      "id": "f0ea2e17-479a-4e54-aa46-72996cecdf7f",
+      "name": "Get an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "v5zxtd1GFTmq9rIY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com. Default Personal.', 'string') }}",
+          "mode": "id",
+          "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+        },
+        "start": "={{ $fromAI('Start', 'Event start time, ISO 8601 format, e.g. 2026-09-15T09:00:00+07:00', 'string') }}",
+        "end": "={{ $fromAI('End', 'Event end time, ISO 8601 format, e.g. 2026-09-15T10:00:00+07:00', 'string') }}",
+        "useDefaultReminders": "={{ $fromAI('Use_Default_Reminders', 'Whether to use Google Calendar default reminders', 'boolean') }}",
+        "additionalFields": {
+          "description": "={{ $fromAI('Description', 'Event description or notes, can be empty', 'string') }}",
+          "location": "={{ $fromAI('Location', 'Event location, can be empty', 'string') }}",
+          "summary": "={{ $fromAI('Summary', 'Short event title', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        688
+      ],
+      "id": "4aa10c32-05dc-4369-a5a7-d7587387c2d4",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "v5zxtd1GFTmq9rIY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com. Default Personal.', 'string') }}",
+          "mode": "id",
+          "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+        },
+        "eventId": "={{ $fromAI('Event_ID', 'Google Calendar event ID to update', 'string') }}",
+        "updateFields": {
+          "description": "={{ $fromAI('Description', 'New event description, leave empty if unchanged', 'string') }}",
+          "end": "={{ $fromAI('End', 'New end time, ISO 8601 format, leave empty if unchanged', 'string') }}",
+          "location": "={{ $fromAI('Location', 'New event location, leave empty if unchanged', 'string') }}",
+          "start": "={{ $fromAI('Start', 'New start time, ISO 8601 format, leave empty if unchanged', 'string') }}",
+          "summary": "={{ $fromAI('Summary', 'New event title, leave empty if unchanged', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        688
+      ],
+      "id": "8b80df3b-fabc-4e55-b484-d6f962967776",
+      "name": "Update an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "v5zxtd1GFTmq9rIY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com. Default Personal.', 'string') }}",
+          "mode": "id",
+          "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+        },
+        "eventId": "={{ $fromAI('Event_ID', 'Google Calendar event ID to delete', 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        736
+      ],
+      "id": "38dcfad3-3fb3-4cb2-889d-d23d1f376a3e",
+      "name": "Delete an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "v5zxtd1GFTmq9rIY",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com, Birthdays=addressbook#contacts@group.v.calendar.google.com (read-only, from Contacts). Default Personal. For birthday questions, also check Birthdays.', 'string') }}",
+          "mode": "id",
+          "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+        },
+        "limit": "={{ $fromAI('Limit', 'Max number of events to fetch, default 20', 'number') }}",
+        "options": {
+          "orderBy": "startTime",
+          "query": "={{ $fromAI('Query', 'Search keyword for events, leave empty to get all events in the time range', 'string') }}",
+          "fields": "items(id,summary,start,end,status)",
+          "timeMin": "={{ $fromAI('Time_Min', 'Start of the search time range, ISO 8601 format, e.g. 2026-09-12T00:00:00+07:00', 'string') }}",
+          "timeMax": "={{ $fromAI('Time_Max', 'End of the search time range, ISO 8601 format, e.g. 2026-09-12T23:59:59+07:00', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        800
+      ],
+      "id": "590552a9-5dcb-4c1b-bdd1-f693d4283812",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "v5zxtd1GFTmq9rIY",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Get an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "jRjQXaIiK8J5j6ig",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "mxJ4s09jzbeKX28p",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T18:21:35.491Z",
+      "updatedAt": "2026-09-09T18:21:35.491Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "ce1e4dcb-fbae-4a24-9dbd-17b812b12593",
+    "workflowId": "mxJ4s09jzbeKX28p",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "calendar"
+        },
+        "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+        "typeVersion": 2.1,
+        "position": [
+          480,
+          384
+        ],
+        "id": "5906b6ad-9afa-4af1-9d7c-80af7a4b7f91",
+        "name": "MCP Server Trigger",
+        "webhookId": "daa62896-db84-45b4-9c37-f0d757d2f488"
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "calendar": {
+            "__rl": true,
+            "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com, Birthdays=addressbook#contacts@group.v.calendar.google.com (read-only, from Contacts). Default Personal.', 'string') }}",
+            "mode": "id"
+          },
+          "eventId": "={{ $fromAI('Event_ID', 'Google Calendar event ID to retrieve details for', 'string') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          256,
+          624
+        ],
+        "id": "f0ea2e17-479a-4e54-aa46-72996cecdf7f",
+        "name": "Get an event in Google Calendar",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "v5zxtd1GFTmq9rIY",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "calendar": {
+            "__rl": true,
+            "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com. Default Personal.', 'string') }}",
+            "mode": "id",
+            "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+          },
+          "start": "={{ $fromAI('Start', 'Event start time, ISO 8601 format, e.g. 2026-09-15T09:00:00+07:00', 'string') }}",
+          "end": "={{ $fromAI('End', 'Event end time, ISO 8601 format, e.g. 2026-09-15T10:00:00+07:00', 'string') }}",
+          "useDefaultReminders": "={{ $fromAI('Use_Default_Reminders', 'Whether to use Google Calendar default reminders', 'boolean') }}",
+          "additionalFields": {
+            "description": "={{ $fromAI('Description', 'Event description or notes, can be empty', 'string') }}",
+            "location": "={{ $fromAI('Location', 'Event location, can be empty', 'string') }}",
+            "summary": "={{ $fromAI('Summary', 'Short event title', 'string') }}"
+          }
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          800,
+          688
+        ],
+        "id": "4aa10c32-05dc-4369-a5a7-d7587387c2d4",
+        "name": "Create an event in Google Calendar",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "v5zxtd1GFTmq9rIY",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "calendar": {
+            "__rl": true,
+            "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com. Default Personal.', 'string') }}",
+            "mode": "id",
+            "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+          },
+          "eventId": "={{ $fromAI('Event_ID', 'Google Calendar event ID to update', 'string') }}",
+          "updateFields": {
+            "description": "={{ $fromAI('Description', 'New event description, leave empty if unchanged', 'string') }}",
+            "end": "={{ $fromAI('End', 'New end time, ISO 8601 format, leave empty if unchanged', 'string') }}",
+            "location": "={{ $fromAI('Location', 'New event location, leave empty if unchanged', 'string') }}",
+            "start": "={{ $fromAI('Start', 'New start time, ISO 8601 format, leave empty if unchanged', 'string') }}",
+            "summary": "={{ $fromAI('Summary', 'New event title, leave empty if unchanged', 'string') }}"
+          }
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          448,
+          688
+        ],
+        "id": "8b80df3b-fabc-4e55-b484-d6f962967776",
+        "name": "Update an event in Google Calendar",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "v5zxtd1GFTmq9rIY",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "delete",
+          "calendar": {
+            "__rl": true,
+            "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com. Default Personal.', 'string') }}",
+            "mode": "id",
+            "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+          },
+          "eventId": "={{ $fromAI('Event_ID', 'Google Calendar event ID to delete', 'string') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          656,
+          736
+        ],
+        "id": "38dcfad3-3fb3-4cb2-889d-d23d1f376a3e",
+        "name": "Delete an event in Google Calendar",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "v5zxtd1GFTmq9rIY",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "getAll",
+          "calendar": {
+            "__rl": true,
+            "value": "={{ $fromAI('Calendar', 'Calendar: Personal=bintangazhar444@gmail.com, Work=1c071fd0d7139a24ce34bd1ff25e8ff37516e64ffdcbf8a0083eabfc4c60c670@group.calendar.google.com, Education=d5f05701a64eb737b2e147d97c0d50af7677773387429db1f46e143189dce72c@group.calendar.google.com, Holidays=en.indonesian#holiday@group.v.calendar.google.com, Birthdays=addressbook#contacts@group.v.calendar.google.com (read-only, from Contacts). Default Personal. For birthday questions, also check Birthdays.', 'string') }}",
+            "mode": "id",
+            "__regex": "^(primary|[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)$"
+          },
+          "limit": "={{ $fromAI('Limit', 'Max number of events to fetch, default 20', 'number') }}",
+          "options": {
+            "orderBy": "startTime",
+            "query": "={{ $fromAI('Query', 'Search keyword for events, leave empty to get all events in the time range', 'string') }}",
+            "fields": "items(id,summary,start,end,status)",
+            "timeMin": "={{ $fromAI('Time_Min', 'Start of the search time range, ISO 8601 format, e.g. 2026-09-12T00:00:00+07:00', 'string') }}",
+            "timeMax": "={{ $fromAI('Time_Max', 'End of the search time range, ISO 8601 format, e.g. 2026-09-12T23:59:59+07:00', 'string') }}"
+          }
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          256,
+          800
+        ],
+        "id": "590552a9-5dcb-4c1b-bdd1-f693d4283812",
+        "name": "Get many events in Google Calendar",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "v5zxtd1GFTmq9rIY",
+            "name": "Google Calendar account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Get an event in Google Calendar": {
+        "ai_tool": [
+          [
+            {
+              "node": "MCP Server Trigger",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create an event in Google Calendar": {
+        "ai_tool": [
+          [
+            {
+              "node": "MCP Server Trigger",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update an event in Google Calendar": {
+        "ai_tool": [
+          [
+            {
+              "node": "MCP Server Trigger",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete an event in Google Calendar": {
+        "ai_tool": [
+          [
+            {
+              "node": "MCP Server Trigger",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get many events in Google Calendar": {
+        "ai_tool": [
+          [
+            {
+              "node": "MCP Server Trigger",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Translate tool parameter descriptions to English",
+    "description": "All $fromAI parameter descriptions across the 5 Google Calendar tool nodes were in Indonesian; translated to English. No functional change (calendar IDs, defaults, and logic unchanged).",
+    "autosaved": false,
+    "createdAt": "2026-09-11T22:42:51.876Z",
+    "updatedAt": "2026-09-11T22:42:51.876Z",
+    "workflowPublishHistory": [
+      {
+        "id": 185,
+        "workflowId": "mxJ4s09jzbeKX28p",
+        "versionId": "ce1e4dcb-fbae-4a24-9dbd-17b812b12593",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T22:42:55.896Z"
+      }
+    ]
+  }
+}
