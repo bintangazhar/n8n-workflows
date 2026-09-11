@@ -1,0 +1,660 @@
+{
+  "id": "2BVOSNh75qA0EBha",
+  "name": "SW - Expense Logger",
+  "description": null,
+  "active": true,
+  "activeVersionId": "26a837dc-87ee-40eb-93b1-0ed8c23d0814",
+  "createdAt": "2026-09-09T15:29:46.666Z",
+  "updatedAt": "2026-09-11T11:55:58.037Z",
+  "isArchived": false,
+  "versionId": "f5c2cf35-e64c-4028-bb5c-7303fccddae5",
+  "versionCounter": 7,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatId"
+            },
+            {
+              "name": "toko"
+            },
+            {
+              "name": "total"
+            },
+            {
+              "name": "items"
+            },
+            {
+              "name": "tanggalStruk"
+            },
+            {
+              "name": "source"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        96
+      ],
+      "id": "bd11108a-a345-43f2-9a45-f085936b533e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.toko }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "2553a77f-3ee9-49d7-b7e9-d1bd68388824",
+      "name": "Data Valid?"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU",
+          "mode": "list",
+          "cachedResultName": "Catatan Belanja",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Pengeluaran",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Toko": "={{ $json.toko }}",
+            "Total": "={{ $json.total }}",
+            "Items": "={{ $json.items }}",
+            "Tanggal Struk": "={{ $json.tanggalStruk }}",
+            "Tanggal Input": "={{ $now.format('yyyy-MM-dd') }}",
+            "Waktu Input": "={{ $now.format('HH:mm:ss') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Toko",
+              "displayName": "Toko",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Items",
+              "displayName": "Items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tanggal Struk",
+              "displayName": "Tanggal Struk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tanggal Input",
+              "displayName": "Tanggal Input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Waktu Input",
+              "displayName": "Waktu Input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1be92c70-39fb-4608-9584-a668ad740494",
+      "name": "Append to Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "r2",
+              "name": "message",
+              "value": "=✅ *Data pengeluaran berhasil disimpan!*\n\n🏭 *Toko:* {{ $('Data Valid?').item.json.toko }}\n📅 *Tanggal:* {{ $('Data Valid?').item.json.tanggalStruk }}\n📦 *Items:* {{ $('Data Valid?').item.json.items }}\n💰 *Total:* Rp{{ $('Data Valid?').item.json.total }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "fcfadf52-904d-474d-b6fb-707116f6c4f0",
+      "name": "Build Success Result"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r3",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "r4",
+              "name": "message",
+              "value": "=❌ Data pengeluaran tidak lengkap (toko/total kosong). Coba ulangi dengan format yang lebih jelas, misal: \"beli telur 1kg 20rb di Toko Mbak Ita\".",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        192
+      ],
+      "id": "9874a2f9-3642-4ec3-8ce6-7768faaaff1e",
+      "name": "Build Error Result"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Data Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Valid?": {
+      "main": [
+        [
+          {
+            "node": "Append to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Error Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Build Success Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "jRjQXaIiK8J5j6ig",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "2BVOSNh75qA0EBha",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T15:29:46.666Z",
+      "updatedAt": "2026-09-09T15:29:46.666Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "26a837dc-87ee-40eb-93b1-0ed8c23d0814",
+    "workflowId": "2BVOSNh75qA0EBha",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chatId"
+              },
+              {
+                "name": "toko"
+              },
+              {
+                "name": "total"
+              },
+              {
+                "name": "items"
+              },
+              {
+                "name": "tanggalStruk"
+              },
+              {
+                "name": "source"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -496,
+          96
+        ],
+        "id": "bd11108a-a345-43f2-9a45-f085936b533e",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.toko }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              },
+              {
+                "id": "c2",
+                "leftValue": "={{ $json.total }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -224,
+          96
+        ],
+        "id": "2553a77f-3ee9-49d7-b7e9-d1bd68388824",
+        "name": "Data Valid?"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU",
+            "mode": "list",
+            "cachedResultName": "Catatan Belanja",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Pengeluaran",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Toko": "={{ $json.toko }}",
+              "Total": "={{ $json.total }}",
+              "Items": "={{ $json.items }}",
+              "Tanggal Struk": "={{ $json.tanggalStruk }}",
+              "Tanggal Input": "={{ $now.format('yyyy-MM-dd') }}",
+              "Waktu Input": "={{ $now.format('HH:mm:ss') }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Toko",
+                "displayName": "Toko",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Total",
+                "displayName": "Total",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Items",
+                "displayName": "Items",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Tanggal Struk",
+                "displayName": "Tanggal Struk",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Tanggal Input",
+                "displayName": "Tanggal Input",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Waktu Input",
+                "displayName": "Waktu Input",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          0,
+          0
+        ],
+        "id": "1be92c70-39fb-4608-9584-a668ad740494",
+        "name": "Append to Sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "7k6H6iPtMGHICq5n",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1",
+                "name": "ok",
+                "value": true,
+                "type": "boolean"
+              },
+              {
+                "id": "r2",
+                "name": "message",
+                "value": "=✅ *Data pengeluaran berhasil disimpan!*\n\n🏭 *Toko:* {{ $('Data Valid?').item.json.toko }}\n📅 *Tanggal:* {{ $('Data Valid?').item.json.tanggalStruk }}\n📦 *Items:* {{ $('Data Valid?').item.json.items }}\n💰 *Total:* Rp{{ $('Data Valid?').item.json.total }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          0
+        ],
+        "id": "fcfadf52-904d-474d-b6fb-707116f6c4f0",
+        "name": "Build Success Result"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r3",
+                "name": "ok",
+                "value": false,
+                "type": "boolean"
+              },
+              {
+                "id": "r4",
+                "name": "message",
+                "value": "=❌ Data pengeluaran tidak lengkap (toko/total kosong). Coba ulangi dengan format yang lebih jelas, misal: \"beli telur 1kg 20rb di Toko Mbak Ita\".",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          0,
+          192
+        ],
+        "id": "9874a2f9-3642-4ec3-8ce6-7768faaaff1e",
+        "name": "Build Error Result"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Data Valid?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Data Valid?": {
+        "main": [
+          [
+            {
+              "node": "Append to Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Build Error Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Append to Sheet": {
+        "main": [
+          [
+            {
+              "node": "Build Success Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar",
+    "name": "Version 26a837dc",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-09T15:52:42.687Z",
+    "updatedAt": "2026-09-09T15:53:03.294Z",
+    "workflowPublishHistory": [
+      {
+        "id": 13,
+        "workflowId": "2BVOSNh75qA0EBha",
+        "versionId": "26a837dc-87ee-40eb-93b1-0ed8c23d0814",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T15:53:03.285Z"
+      },
+      {
+        "id": 118,
+        "workflowId": "2BVOSNh75qA0EBha",
+        "versionId": "26a837dc-87ee-40eb-93b1-0ed8c23d0814",
+        "event": "deactivated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T18:31:13.242Z"
+      },
+      {
+        "id": 119,
+        "workflowId": "2BVOSNh75qA0EBha",
+        "versionId": "26a837dc-87ee-40eb-93b1-0ed8c23d0814",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T18:31:13.256Z"
+      }
+    ]
+  }
+}
