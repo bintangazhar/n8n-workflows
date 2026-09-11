@@ -1,0 +1,135 @@
+{
+  "kind": "drive#file",
+  "id": "1okaGLfkxyX7t1KYM7pxfIqDcw_3oSS7Q",
+  "name": "My workflow.json",
+  "mimeType": "application/json",
+  "starred": false,
+  "trashed": false,
+  "explicitlyTrashed": false,
+  "parents": [
+    "1rmpzbU2GdrxH9J9MUy8ZiRIP5zZfmpX3"
+  ],
+  "spaces": [
+    "drive"
+  ],
+  "version": "2",
+  "webContentLink": "https://drive.google.com/uc?id=1okaGLfkxyX7t1KYM7pxfIqDcw_3oSS7Q&export=download",
+  "webViewLink": "https://drive.google.com/file/d/1okaGLfkxyX7t1KYM7pxfIqDcw_3oSS7Q/view?usp=drivesdk",
+  "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/json",
+  "hasThumbnail": false,
+  "thumbnailVersion": "0",
+  "viewedByMe": false,
+  "createdTime": "2026-09-11T23:11:45.114Z",
+  "modifiedTime": "2026-09-11T23:11:46.057Z",
+  "modifiedByMeTime": "2026-09-11T23:11:46.057Z",
+  "modifiedByMe": true,
+  "owners": [
+    {
+      "kind": "drive#user",
+      "displayName": "Bintang Azhar",
+      "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIsn_IigZK5QIpPbqaufJdYEO49WOlyZUZeevx4YP_yKvVcdBDE=s64",
+      "me": true,
+      "permissionId": "08380412254861648256",
+      "emailAddress": "bintangazhar444@gmail.com"
+    }
+  ],
+  "lastModifyingUser": {
+    "kind": "drive#user",
+    "displayName": "Bintang Azhar",
+    "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocIsn_IigZK5QIpPbqaufJdYEO49WOlyZUZeevx4YP_yKvVcdBDE=s64",
+    "me": true,
+    "permissionId": "08380412254861648256",
+    "emailAddress": "bintangazhar444@gmail.com"
+  },
+  "shared": false,
+  "ownedByMe": true,
+  "downloadRestrictions": {
+    "itemDownloadRestriction": {
+      "restrictedForReaders": false,
+      "restrictedForWriters": false
+    },
+    "effectiveDownloadRestrictionWithContext": {
+      "restrictedForReaders": false,
+      "restrictedForWriters": false
+    }
+  },
+  "capabilities": {
+    "canAcceptOwnership": false,
+    "canAccessViaGenAi": true,
+    "canAddChildren": false,
+    "canAddMyDriveParent": false,
+    "canChangeCopyRequiresWriterPermission": true,
+    "canChangeItemDownloadRestriction": true,
+    "canChangeSecurityUpdateEnabled": false,
+    "canChangeViewersCanCopyContent": true,
+    "canComment": true,
+    "canCopy": true,
+    "canDelete": true,
+    "canDisableInheritedPermissions": false,
+    "canDownload": true,
+    "canEdit": true,
+    "canEnableInheritedPermissions": true,
+    "canListChildren": false,
+    "canModifyContent": true,
+    "canModifyContentRestriction": true,
+    "canModifyEditorContentRestriction": true,
+    "canModifyOwnerContentRestriction": true,
+    "canModifyLabels": false,
+    "canMoveChildrenWithinDrive": false,
+    "canMoveItemIntoTeamDrive": true,
+    "canMoveItemOutOfDrive": true,
+    "canMoveItemWithinDrive": true,
+    "canReadLabels": false,
+    "canReadRevisions": true,
+    "canRemoveChildren": false,
+    "canRemoveContentRestriction": false,
+    "canRemoveMyDriveParent": true,
+    "canRename": true,
+    "canShare": true,
+    "canTrash": true,
+    "canUntrash": true,
+    "canStartApproval": false
+  },
+  "viewersCanCopyContent": true,
+  "copyRequiresWriterPermission": false,
+  "writersCanShare": true,
+  "permissions": [
+    {
+      "kind": "drive#permission",
+      "id": "08380412254861648256",
+      "type": "user",
+      "emailAddress": "bintangazhar444@gmail.com",
+      "role": "owner",
+      "displayName": "bintangazhar444",
+      "deleted": false,
+      "pendingOwner": false
+    }
+  ],
+  "permissionIds": [
+    "08380412254861648256"
+  ],
+  "originalFilename": "My workflow.json",
+  "fullFileExtension": "json",
+  "fileExtension": "json",
+  "md5Checksum": "b8e00a9447c686c13cf30256de8feb78",
+  "sha1Checksum": "a5b0a74e74ac3035f5c9119c451b88945ddd9fbf",
+  "sha256Checksum": "0ae76d234025fe4ac3e918b41fff73caae29c4d8f4a8ac15de0e61243b2bc5b6",
+  "size": "4032",
+  "quotaBytesUsed": "4032",
+  "headRevisionId": "0B9XpEfBrYRJNSEdwRnRBUEZFOTk1ZG91Tkp2Z1JvM0QzOU9BPQ",
+  "isAppAuthorized": true,
+  "clientEncryptionDetails": {
+    "decryptionMetadata": {
+      "wrappedKey": "",
+      "kaclsId": "0",
+      "aes256GcmChunkSize": "unset",
+      "keyFormat": "unsetKeyFormat",
+      "encryptionResourceKeyHash": ""
+    }
+  },
+  "linkShareMetadata": {
+    "securityUpdateEligible": false,
+    "securityUpdateEnabled": true
+  },
+  "inheritedPermissionsDisabled": false
+}
