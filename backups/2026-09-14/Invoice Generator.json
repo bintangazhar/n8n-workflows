@@ -1,0 +1,744 @@
+{
+  "id": "Syc29JCDrjYJZVz8",
+  "name": "Invoice Generator",
+  "description": "Form untuk generate invoice otomatis: isi data klien → simpan ke Sheets → isi template Docs → export PDF → kirim ke Telegram untuk direview sebelum diteruskan ke klien",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-12T00:07:35.813Z",
+  "updatedAt": "2026-09-13T19:56:08.517Z",
+  "isArchived": false,
+  "versionId": "5e1a8288-8421-4d68-8d07-e6c2a28168b1",
+  "versionCounter": 24,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Buat Invoice Baru - Ngoding House",
+        "formDescription": "Isi detail invoice untuk klien",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nama Klien / Perusahaan",
+              "fieldName": "namaKlien",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Klien",
+              "fieldType": "email",
+              "fieldName": "emailKlien",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Nama Proyek",
+              "fieldName": "namaProyek",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Deskripsi Item/Jasa",
+              "fieldType": "textarea",
+              "fieldName": "item",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Qty",
+              "fieldType": "number",
+              "fieldName": "qty",
+              "defaultValue": "1",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Harga Satuan (Rp)",
+              "fieldType": "number",
+              "fieldName": "hargaSatuan",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Jatuh Tempo Pembayaran",
+              "fieldType": "date",
+              "fieldName": "jatuhTempo",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Buat Invoice"
+        }
+      },
+      "id": "fd2eec18-6617-4ecb-86c6-660bd2988c3a",
+      "name": "Invoice Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -800,
+        400
+      ],
+      "webhookId": "3513c530-ecf4-4f44-b8f7-44e33f220af3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst qty = Number(data.qty);\nconst hargaSatuan = Number(data.hargaSatuan);\nconst total = qty * hargaSatuan;\nconst dateStr = $now.toFormat('yyyyMMdd-HHmmss');\nconst nomorInvoice = `INV-${$now.toFormat('yyyyMM')}-${$now.toFormat('HHmmss')}`;\nconst tanggalInvoice = $now.toFormat('dd MMMM yyyy');\nconst jatuhTempo = data.jatuhTempo;\nconst fileName = `Invoice-${nomorInvoice}-${data.namaKlien}`.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\\s+/g, '-');\nreturn [{\n  json: {\n    status: 'pending',\n    namaKlien: data.namaKlien,\n    emailKlien: data.emailKlien,\n    namaProyek: data.namaProyek,\n    item: data.item,\n    qty: String(qty),\n    hargaSatuan: hargaSatuan.toLocaleString('id-ID'),\n    total: total.toLocaleString('id-ID'),\n    tanggalInvoice,\n    jatuhTempo,\n    nomorInvoice,\n    fileName\n  }\n}];\n"
+      },
+      "id": "9475acf6-5db2-4c1a-b08a-005330b504d9",
+      "name": "Prepare Invoice Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1n6YSX5xxXCF70twxJrC348dnalzEwNCQVpgJWN1nLt8",
+          "cachedResultName": "Ngoding House - Invoice Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string"
+            },
+            {
+              "id": "namaKlien",
+              "displayName": "namaKlien",
+              "type": "string"
+            },
+            {
+              "id": "emailKlien",
+              "displayName": "emailKlien",
+              "type": "string"
+            },
+            {
+              "id": "namaProyek",
+              "displayName": "namaProyek",
+              "type": "string"
+            },
+            {
+              "id": "item",
+              "displayName": "item",
+              "type": "string"
+            },
+            {
+              "id": "qty",
+              "displayName": "qty",
+              "type": "string"
+            },
+            {
+              "id": "hargaSatuan",
+              "displayName": "hargaSatuan",
+              "type": "string"
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "type": "string"
+            },
+            {
+              "id": "tanggalInvoice",
+              "displayName": "tanggalInvoice",
+              "type": "string"
+            },
+            {
+              "id": "jatuhTempo",
+              "displayName": "jatuhTempo",
+              "type": "string"
+            },
+            {
+              "id": "nomorInvoice",
+              "displayName": "nomorInvoice",
+              "type": "string"
+            },
+            {
+              "id": "linkDocs",
+              "displayName": "linkDocs",
+              "type": "string"
+            },
+            {
+              "id": "linkPdf",
+              "displayName": "linkPdf",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fa1bb074-69ad-4b94-94cd-785fabb876cc",
+      "name": "Save Invoice to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -400,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1MtNVi0gbkYdow5SiNz1LTLqKVgldHbsIOgAorgJ8TWY",
+          "cachedResultName": "Template Invoice - Ngoding House"
+        },
+        "name": "={{ $('Prepare Invoice Data').item.json.fileName }}",
+        "options": {}
+      },
+      "id": "41da77fa-6546-447b-9fe3-9a2ebd480a6d",
+      "name": "Copy Invoice Template",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "{{nomorInvoice}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.nomorInvoice }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{tanggalInvoice}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.tanggalInvoice }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{jatuhTempo}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.jatuhTempo }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{namaKlien}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.namaKlien }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{emailKlien}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.emailKlien }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{namaProyek}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.namaProyek }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{item}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.item }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{qty}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.qty }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{hargaSatuan}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.hargaSatuan }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{total}}",
+              "replaceText": "={{ $('Prepare Invoice Data').item.json.total }}"
+            }
+          ]
+        }
+      },
+      "id": "d006afe1-399d-4c99-8b5f-bca8dd9762f7",
+      "name": "Fill Invoice Template",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        0,
+        400
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "jHZwOUXg1X7A9qap",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Copy Invoice Template').item.json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "={{ $('Prepare Invoice Data').item.json.fileName + '.pdf' }}"
+        }
+      },
+      "id": "85c53aca-4cae-489f-bf78-6d8ca51ed0e6",
+      "name": "Export as PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Prepare Invoice Data').item.json.fileName + '.pdf' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "573d674c-882b-4816-8e76-500a61e31fee",
+      "name": "Upload PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        400,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1n6YSX5xxXCF70twxJrC348dnalzEwNCQVpgJWN1nLt8",
+          "cachedResultName": "Ngoding House - Invoice Database"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nomorInvoice": "={{ $('Prepare Invoice Data').item.json.nomorInvoice }}",
+            "status": "sudah dibuat"
+          },
+          "matchingColumns": [
+            "nomorInvoice"
+          ],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "namaKlien",
+              "displayName": "namaKlien",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "emailKlien",
+              "displayName": "emailKlien",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "namaProyek",
+              "displayName": "namaProyek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "item",
+              "displayName": "item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "qty",
+              "displayName": "qty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hargaSatuan",
+              "displayName": "hargaSatuan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tanggalInvoice",
+              "displayName": "tanggalInvoice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "jatuhTempo",
+              "displayName": "jatuhTempo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nomorInvoice",
+              "displayName": "nomorInvoice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fileName",
+              "displayName": "fileName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0f7281c2-e788-485f-aaa9-76269debc2c4",
+      "name": "Update Sheet with Links",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "588062764",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "={{ '📄 <b>Invoice Baru Siap Direview</b>\\n\\n' + '🧾 No: ' + $('Prepare Invoice Data').item.json.nomorInvoice + '\\n' + '👤 Klien: ' + $('Prepare Invoice Data').item.json.namaKlien + '\\n' + '💰 Total: Rp' + $('Prepare Invoice Data').item.json.total + '\\n' + '📅 Jatuh Tempo: ' + $('Prepare Invoice Data').item.json.jatuhTempo + '\\n\\n' + '✏️ Edit: https://docs.google.com/document/d/' + $('Copy Invoice Template').item.json.id + '/edit' }}",
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "47493447-23bf-4c29-98dc-08fed531be5c",
+      "name": "Send to Telegram for Review",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        384
+      ],
+      "webhookId": "7b45ff54-b53f-438f-8382-b6aa0ab11ffa",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Invoice Generator\n\n1. Form trigger buat isi data invoice (nama klien, item, harga, jatuh tempo)\n2. Data tersimpan ke Google Sheets sebagai database invoice\n3. Template Docs di-copy & diisi otomatis\n4. Di-export jadi PDF, di-upload ke Drive\n5. Link Docs (editable) + PDF dikirim ke Telegram untuk direview sebelum diteruskan ke klien\n\nKredensial: Google Sheets, Google Drive, Google Docs, Telegram\nSheet: \"Ngoding House - Invoice Database\"\nTemplate: \"Template Invoice - Ngoding House\"",
+        "color": 4
+      },
+      "id": "4140cda3-4ecf-4061-a91c-d7fdb362d520",
+      "name": "Sticky Note 4a2a643b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const pdf = $('Export as PDF').item.binary.data;\nconst json = $input.first().json;\nreturn [{\n  json,\n  binary: { data: pdf }\n}];\n"
+      },
+      "id": "reattach-pdf-binary-001",
+      "name": "Reattach PDF Binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Invoice Form": {
+      "main": [
+        [
+          {
+            "node": "Prepare Invoice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Invoice Data": {
+      "main": [
+        [
+          {
+            "node": "Save Invoice to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Invoice to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Copy Invoice Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Invoice Template": {
+      "main": [
+        [
+          {
+            "node": "Fill Invoice Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fill Invoice Template": {
+      "main": [
+        [
+          {
+            "node": "Export as PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Export as PDF": {
+      "main": [
+        [
+          {
+            "node": "Upload PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload PDF": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet with Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet with Links": {
+      "main": [
+        [
+          {
+            "node": "Reattach PDF Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reattach PDF Binary": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {
+    "Invoice Form": [
+      {
+        "json": {
+          "namaKlien": "PT Pilar Pendidikan Internasional",
+          "emailKlien": "test@example.com",
+          "namaProyek": "Web Developer",
+          "item": "Fullstack",
+          "qty": 1,
+          "hargaSatuan": 50000,
+          "jatuhTempo": "2026-09-30",
+          "submittedAt": "2026-09-13T14:16:05.997+07:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Syc29JCDrjYJZVz8",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-12T00:07:35.813Z",
+      "updatedAt": "2026-09-12T00:07:35.813Z"
+    }
+  ],
+  "activeVersion": null
+}
