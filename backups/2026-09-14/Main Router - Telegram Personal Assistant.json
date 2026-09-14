@@ -1,0 +1,1345 @@
+{
+  "id": "QUaDxZiGWmqtCW1L",
+  "name": "Main Router - Telegram Personal Assistant",
+  "description": null,
+  "active": true,
+  "activeVersionId": "56938a9c-9263-439c-8c07-faba0cb7943f",
+  "createdAt": "2026-09-09T15:25:39.151Z",
+  "updatedAt": "2026-09-11T22:43:06.218Z",
+  "isArchived": false,
+  "versionId": "56938a9c-9263-439c-8c07-faba0cb7943f",
+  "versionCounter": 101,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -896,
+        224
+      ],
+      "id": "54c82845-08ed-4461-b9f9-25b88f43d1bb",
+      "name": "on_message",
+      "webhookId": "51c4c9ad-8a28-4441-9c65-fb4c53099640",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.from.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -704,
+        224
+      ],
+      "id": "a505b956-14fd-430b-9c22-32639236cdad",
+      "name": "typing",
+      "webhookId": "3867da63-d7c0-44e1-964d-f82190597d54",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "allow1",
+              "leftValue": "={{ $('on_message').item.json.message.from.id }}",
+              "rightValue": 588062764,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {},
+        "notes": "Single source of truth for the allow-list (previously there were 2 separate/redundant nodes: an 'Allow List' Set node + a 'cek_akun' IF node, both hardcoding the same ID). If you want multi-user later, replace rightValue with a lookup to the 'Users' Google Sheet via a Google Sheets node here."
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -512,
+        224
+      ],
+      "id": "d271e56f-a4fa-450e-9398-6bc63115704d",
+      "name": "Allow List Check",
+      "notes": "Single source of truth untuk allow-list (dulu ada 2 node terpisah/redundant: 'Allow List' Set node + 'cek_akun' IF node yang keduanya hardcode ID sama). Kalau nanti mau multi-user, ganti rightValue jadi lookup ke Google Sheet 'Users' via node Google Sheets di sini."
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('on_message').item.json.message.from.id }}",
+        "text": "=Mau buat chatbot AI Personal Assistant atau Customer Services untuk tokomu? Diskusi di sini ([@opchatgpt](https://t.me/opchatgpt))! 😉\n\nWanna build an AI Chatbot Personal Assistant or Customer Service for your business? Let's talk ([@opchatgpt](https://t.me/opchatgpt))! 😉",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        336
+      ],
+      "id": "c8f32857-8a07-4e2b-a9c9-dfd67941f9f9",
+      "name": "Reject Unknown User",
+      "webhookId": "714ef42b-2ccd-4b6d-a046-b5c21e457d66",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "s1",
+                    "leftValue": "={{ $('on_message').item.json.message.photo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "array",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Photo"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "s2",
+                    "leftValue": "={{ $('on_message').item.json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "s3",
+                    "leftValue": "={{ $('on_message').item.json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -320,
+        -16
+      ],
+      "id": "f6770bf6-abe5-4a89-92c0-dfad0e6a17c2",
+      "name": "Route by Message Type"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "htPVEbya5KlmWMbR",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/htPVEbya5KlmWMbR",
+          "cachedResultName": "SW - Receipt OCR"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatId": "588062764",
+            "fileId": "={{ $('on_message').item.json.message.photo.slice(-1)[0].file_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "fileId",
+              "displayName": "fileId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        -96
+      ],
+      "id": "ad11248c-634a-4efe-97ae-4f46f0c9518f",
+      "name": "Call Receipt OCR"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ISCwaCOSLiPEWKE0",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/ISCwaCOSLiPEWKE0",
+          "cachedResultName": "SW - Voice Transcribe"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatId": "588062764",
+            "fileId": "={{ $('on_message').item.json.message.voice.file_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "fileId",
+              "displayName": "fileId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        80
+      ],
+      "id": "28cdf3b4-4e11-4645-89dc-133c0d870f96",
+      "name": "Call Voice Transcribe"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "IfpTPdlsf1xS5mVN",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/IfpTPdlsf1xS5mVN",
+          "cachedResultName": "SW - Intent Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatId": "=588062764",
+            "userText": "={{ $('on_message').item.json.message.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "userText",
+              "displayName": "userText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        336
+      ],
+      "id": "8a5de770-d863-4063-9e99-45faf40e41e3",
+      "name": "Call Intent Agent (Text)"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('on_message').item.json.message.chat.id }}",
+        "text": "=Maaf aku gak paham maksudmu 😔",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        512
+      ],
+      "id": "a3d6b3e0-585c-4598-9572-1c31016d8e69",
+      "name": "Unrecognized Message",
+      "webhookId": "15e5efcc-bf53-46cf-a081-7c60cf7104bb",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "IfpTPdlsf1xS5mVN",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/IfpTPdlsf1xS5mVN",
+          "cachedResultName": "SW - Intent Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatId": "={{ $json.chatId }}",
+            "userText": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "userText",
+              "displayName": "userText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {},
+        "notes": "Voice transcription result is forwarded to the same Intent Agent as the text path; one brain for classification, not a separate agent per input source."
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        112
+      ],
+      "id": "e77fd5f6-f23e-4de7-ba3d-8fcedda1da2b",
+      "name": "Call Intent Agent (Voice)",
+      "notes": "Hasil transkrip suara diteruskan ke Intent Agent yang sama dengan jalur teks — satu otak untuk klasifikasi, bukan agent terpisah per sumber input."
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('on_message').item.json.message.chat.id }}",
+        "text": "={{ $('message').item.json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        144
+      ],
+      "id": "cae7ac9a-9984-4a44-9281-9e8f13560924",
+      "name": "Send Reply",
+      "webhookId": "0dca0765-00ec-491b-99a3-1c40f4c56b75",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9d261e58-43f6-45de-b921-c8521f937346",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        480,
+        160
+      ],
+      "id": "752d8a10-6f9c-43d8-a4d0-4a219b022f18",
+      "name": "message"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $('on_message').item.json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        160
+      ],
+      "id": "cc1c2def-56af-4145-8ff4-cd35c61855a4",
+      "name": "typing lagi",
+      "webhookId": "3867da63-d7c0-44e1-964d-f82190597d54",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "on_message": {
+      "main": [
+        [
+          {
+            "node": "typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "typing": {
+      "main": [
+        [
+          {
+            "node": "Allow List Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Allow List Check": {
+      "main": [
+        [
+          {
+            "node": "Route by Message Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject Unknown User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Message Type": {
+      "main": [
+        [
+          {
+            "node": "Call Receipt OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Voice Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Intent Agent (Text)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Unrecognized Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Receipt OCR": {
+      "main": [
+        [
+          {
+            "node": "message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Voice Transcribe": {
+      "main": [
+        [
+          {
+            "node": "Call Intent Agent (Voice)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Intent Agent (Text)": {
+      "main": [
+        [
+          {
+            "node": "message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Intent Agent (Voice)": {
+      "main": [
+        [
+          {
+            "node": "message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "message": {
+      "main": [
+        [
+          {
+            "node": "typing lagi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "typing lagi": {
+      "main": [
+        [
+          {
+            "node": "Send Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "jRjQXaIiK8J5j6ig"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "QUaDxZiGWmqtCW1L",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T15:25:39.151Z",
+      "updatedAt": "2026-09-09T15:25:39.151Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "56938a9c-9263-439c-8c07-faba0cb7943f",
+    "workflowId": "QUaDxZiGWmqtCW1L",
+    "nodes": [
+      {
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -896,
+          224
+        ],
+        "id": "54c82845-08ed-4461-b9f9-25b88f43d1bb",
+        "name": "on_message",
+        "webhookId": "51c4c9ad-8a28-4441-9c65-fb4c53099640",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "sendChatAction",
+          "chatId": "={{ $json.message.from.id }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          -704,
+          224
+        ],
+        "id": "a505b956-14fd-430b-9c22-32639236cdad",
+        "name": "typing",
+        "webhookId": "3867da63-d7c0-44e1-964d-f82190597d54",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "allow1",
+                "leftValue": "={{ $('on_message').item.json.message.from.id }}",
+                "rightValue": 588062764,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {},
+          "notes": "Single source of truth for the allow-list (previously there were 2 separate/redundant nodes: an 'Allow List' Set node + a 'cek_akun' IF node, both hardcoding the same ID). If you want multi-user later, replace rightValue with a lookup to the 'Users' Google Sheet via a Google Sheets node here."
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -512,
+          224
+        ],
+        "id": "d271e56f-a4fa-450e-9398-6bc63115704d",
+        "name": "Allow List Check",
+        "notes": "Single source of truth untuk allow-list (dulu ada 2 node terpisah/redundant: 'Allow List' Set node + 'cek_akun' IF node yang keduanya hardcode ID sama). Kalau nanti mau multi-user, ganti rightValue jadi lookup ke Google Sheet 'Users' via node Google Sheets di sini."
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('on_message').item.json.message.from.id }}",
+          "text": "=Mau buat chatbot AI Personal Assistant atau Customer Services untuk tokomu? Diskusi di sini ([@opchatgpt](https://t.me/opchatgpt))! 😉\n\nWanna build an AI Chatbot Personal Assistant or Customer Service for your business? Let's talk ([@opchatgpt](https://t.me/opchatgpt))! 😉",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "Markdown"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          -336,
+          336
+        ],
+        "id": "c8f32857-8a07-4e2b-a9c9-dfd67941f9f9",
+        "name": "Reject Unknown User",
+        "webhookId": "714ef42b-2ccd-4b6d-a046-b5c21e457d66",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "s1",
+                      "leftValue": "={{ $('on_message').item.json.message.photo }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "array",
+                        "operation": "exists",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "Photo"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "s2",
+                      "leftValue": "={{ $('on_message').item.json.message.voice.file_id }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "exists",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "Voice"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "s3",
+                      "leftValue": "={{ $('on_message').item.json.message.text }}",
+                      "rightValue": "",
+                      "operator": {
+                        "type": "string",
+                        "operation": "exists",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "Text"
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra"
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          -320,
+          -16
+        ],
+        "id": "f6770bf6-abe5-4a89-92c0-dfad0e6a17c2",
+        "name": "Route by Message Type"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "htPVEbya5KlmWMbR",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/htPVEbya5KlmWMbR",
+            "cachedResultName": "SW - Receipt OCR"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chatId": "588062764",
+              "fileId": "={{ $('on_message').item.json.message.photo.slice(-1)[0].file_id }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chatId",
+                "displayName": "chatId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "fileId",
+                "displayName": "fileId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          128,
+          -96
+        ],
+        "id": "ad11248c-634a-4efe-97ae-4f46f0c9518f",
+        "name": "Call Receipt OCR"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "ISCwaCOSLiPEWKE0",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/ISCwaCOSLiPEWKE0",
+            "cachedResultName": "SW - Voice Transcribe"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chatId": "588062764",
+              "fileId": "={{ $('on_message').item.json.message.voice.file_id }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chatId",
+                "displayName": "chatId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "fileId",
+                "displayName": "fileId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          -16,
+          80
+        ],
+        "id": "28cdf3b4-4e11-4645-89dc-133c0d870f96",
+        "name": "Call Voice Transcribe"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "IfpTPdlsf1xS5mVN",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/IfpTPdlsf1xS5mVN",
+            "cachedResultName": "SW - Intent Agent"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chatId": "=588062764",
+              "userText": "={{ $('on_message').item.json.message.text }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chatId",
+                "displayName": "chatId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "userText",
+                "displayName": "userText",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          96,
+          336
+        ],
+        "id": "8a5de770-d863-4063-9e99-45faf40e41e3",
+        "name": "Call Intent Agent (Text)"
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('on_message').item.json.message.chat.id }}",
+          "text": "=Maaf aku gak paham maksudmu 😔",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          -16,
+          512
+        ],
+        "id": "a3d6b3e0-585c-4598-9572-1c31016d8e69",
+        "name": "Unrecognized Message",
+        "webhookId": "15e5efcc-bf53-46cf-a081-7c60cf7104bb",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "IfpTPdlsf1xS5mVN",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/IfpTPdlsf1xS5mVN",
+            "cachedResultName": "SW - Intent Agent"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chatId": "={{ $json.chatId }}",
+              "userText": "={{ $json.text }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chatId",
+                "displayName": "chatId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "userText",
+                "displayName": "userText",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {},
+          "notes": "Voice transcription result is forwarded to the same Intent Agent as the text path; one brain for classification, not a separate agent per input source."
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          176,
+          112
+        ],
+        "id": "e77fd5f6-f23e-4de7-ba3d-8fcedda1da2b",
+        "name": "Call Intent Agent (Voice)",
+        "notes": "Hasil transkrip suara diteruskan ke Intent Agent yang sama dengan jalur teks — satu otak untuk klasifikasi, bukan agent terpisah per sumber input."
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('on_message').item.json.message.chat.id }}",
+          "text": "={{ $('message').item.json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "Markdown"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          880,
+          144
+        ],
+        "id": "cae7ac9a-9984-4a44-9281-9e8f13560924",
+        "name": "Send Reply",
+        "webhookId": "0dca0765-00ec-491b-99a3-1c40f4c56b75",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "9d261e58-43f6-45de-b921-c8521f937346",
+                "name": "message",
+                "value": "={{ $json.message }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.5,
+        "position": [
+          480,
+          160
+        ],
+        "id": "752d8a10-6f9c-43d8-a4d0-4a219b022f18",
+        "name": "message"
+      },
+      {
+        "parameters": {
+          "operation": "sendChatAction",
+          "chatId": "={{ $('on_message').item.json.message.chat.id }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          672,
+          160
+        ],
+        "id": "cc1c2def-56af-4145-8ff4-cd35c61855a4",
+        "name": "typing lagi",
+        "webhookId": "3867da63-d7c0-44e1-964d-f82190597d54",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "on_message": {
+        "main": [
+          [
+            {
+              "node": "typing",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "typing": {
+        "main": [
+          [
+            {
+              "node": "Allow List Check",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Allow List Check": {
+        "main": [
+          [
+            {
+              "node": "Route by Message Type",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Reject Unknown User",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route by Message Type": {
+        "main": [
+          [
+            {
+              "node": "Call Receipt OCR",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Voice Transcribe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Intent Agent (Text)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Unrecognized Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Receipt OCR": {
+        "main": [
+          [
+            {
+              "node": "message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Voice Transcribe": {
+        "main": [
+          [
+            {
+              "node": "Call Intent Agent (Voice)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Intent Agent (Text)": {
+        "main": [
+          [
+            {
+              "node": "message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Intent Agent (Voice)": {
+        "main": [
+          [
+            {
+              "node": "message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "message": {
+        "main": [
+          [
+            {
+              "node": "typing lagi",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "typing lagi": {
+        "main": [
+          [
+            {
+              "node": "Send Reply",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Translate node notes to English",
+    "description": "Dev notes on Allow List Check and Call Intent Agent (Voice) were in Indonesian; translated. No functional change.",
+    "autosaved": false,
+    "createdAt": "2026-09-11T22:43:06.220Z",
+    "updatedAt": "2026-09-11T22:43:06.220Z",
+    "workflowPublishHistory": [
+      {
+        "id": 189,
+        "workflowId": "QUaDxZiGWmqtCW1L",
+        "versionId": "56938a9c-9263-439c-8c07-faba0cb7943f",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T22:43:33.686Z"
+      }
+    ]
+  }
+}
