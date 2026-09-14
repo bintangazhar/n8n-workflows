@@ -1,0 +1,1254 @@
+{
+  "id": "dLCjLrzB5lbmau9B",
+  "name": "Weekly n8n Workflow Backup v2",
+  "description": "Weekly backup semua workflow n8n (definisi lengkap) ke Google Drive folder bertanggal + commit ke GitHub, dengan auto-cleanup folder Drive lama",
+  "active": true,
+  "activeVersionId": "1bf8e6a0-73a5-4311-a944-eca7f8b46cd8",
+  "createdAt": "2026-09-11T23:09:20.335Z",
+  "updatedAt": "2026-09-11T23:49:06.602Z",
+  "isArchived": false,
+  "versionId": "1bf8e6a0-73a5-4311-a944-eca7f8b46cd8",
+  "versionCounter": 42,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "00bf2ba6-cb9b-46f3-a084-d71ba7990ab2",
+      "name": "Every Monday 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -688,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ 'Workflow Backups ' + $now.format('cccc t dd-MM-yyyy') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "74b4eb93-4478-4fe6-9a28-16c6859fd1fe",
+      "name": "Create New Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        288
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "720e8ea2-74b9-4994-817e-5bdd2c4d7e79",
+      "name": "Backup Complete",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {
+          "format": true,
+          "fileName": "={{ $json.name }}"
+        }
+      },
+      "id": "4a9cf868-4718-4bd0-af47-849ddc080608",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Loop Over Items').item.json.name.replace(/\\.json$/i, '') + '.json' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create New Folder').item.json.id }}"
+        },
+        "options": {}
+      },
+      "id": "ae5e6fb9-f9ba-4356-9d47-27266430d482",
+      "name": "Upload to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1056,
+        672
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "da7706e9-1914-401c-838d-854919ab94c2",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        384,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "mode": "name",
+          "value": "bintangazhar"
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "name",
+          "value": "n8n-workflows"
+        },
+        "filePath": "={{ 'backups/' + $now.toFormat('yyyy-MM-dd') + '/' + $json.name.replace(/\\.json$/i, '') + '.json' }}",
+        "fileContent": "={{ JSON.stringify($json, null, 2) }}",
+        "commitMessage": "={{ 'Backup: ' + $json.name }}"
+      },
+      "id": "aeb061ce-c295-492f-b49d-527422bf68a9",
+      "name": "Commit to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        288
+      ],
+      "webhookId": "835c9cf8-c336-4aed-beb9-97088f2334f0",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "0SHYJ4ymiz5FIiJV",
+          "name": "GitHub account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "Workflow Backups",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "root",
+            "cachedResultName": "/ (Root folder)"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "id": "aea09f7b-fd54-4afb-8359-b85d7b370a16",
+      "name": "Get Old Folders",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -288,
+        240
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "rightValue": "={{ $('Create New Folder').item.json.id }}"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "81377c77-61a5-4c17-ac33-a17de97c6f4c",
+      "name": "Exclude Current Folder",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "deleteFolder",
+        "folderNoRootId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "deletePermanently": true
+        }
+      },
+      "id": "0ddb3160-88ef-492a-aef1-e50f2f218b2a",
+      "name": "Delete Old Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        160,
+        240
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Weekly n8n Backup\n\nBerdasarkan template n8n.io \"Backup all n8n workflows to Google Drive\" — diadaptasi jadi mingguan + tambahan GitHub.\n\n1. Kredensial: Header Auth (X-N8N-API-KEY) untuk n8n REST API, Google Drive OAuth2, GitHub OAuth2\n2. Pakai HTTP Request 2-tahap (List All Workflows -> Get Workflow Detail per ID), BUKAN node n8n native — node n8n native terbukti tidak scan workflow yang ada di dalam folder\n3. Workflow yang isArchived=true otomatis di-skip (node \"Skip Archived\")\n4. Folder Drive lama otomatis dihapus tiap run supaya gak numpuk\n5. Ganti owner/repository GitHub sesuai repo backup kamu\n6. Isi folderId \"Create New Folder\" & \"Get Old Folders\" ke folder khusus jika tidak mau di root Drive",
+        "height": 624,
+        "color": 5
+      },
+      "id": "bc1b4fa7-0461-48fb-bd6d-d7917aec0152",
+      "name": "Sticky Note 122a69e4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.bintang.me/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "250"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1414f0b2-07c4-469d-9e76-db4da3188f75",
+      "name": "List All Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -288,
+        432
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oAKTg416qzwkR3Sw",
+          "name": "n8n-api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "998b8e01-1dfa-4b6f-a80d-f318c15911a6",
+      "name": "Split Workflow List",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isArchived }}",
+              "operator": {
+                "operation": "false",
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "443e4ad7-b47a-48ad-97f0-20972eb27abe",
+      "name": "Skip Archived",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://n8n.bintang.me/api/v1/workflows/' + $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "51d66fb8-ca43-4227-a3d6-17b06e2d2124",
+      "name": "Get Workflow Detail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        160
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oAKTg416qzwkR3Sw",
+          "name": "n8n-api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "588062764",
+        "text": "=✅ *Backup n8n mingguan selesai*\n\n📅 Tanggal: {{ $now.format('dd MMMM yyyy, HH:mm') }}\n\nTersimpan di GitHub & Google Drive.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "4fa25c49-3a9b-42b4-87bb-fee5afc7dd54",
+      "name": "Notify Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        416
+      ],
+      "webhookId": "1056b792-6edb-4ccb-a475-419e6965f3fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "id": "48818984-7c4e-4c5b-bce6-0f0c7791fe57",
+      "name": "Only One Item",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        416
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 07:00": {
+      "main": [
+        [
+          {
+            "node": "Create New Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Folder": {
+      "main": [
+        [
+          {
+            "node": "Get Old Folders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Drive": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Backup Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Workflow Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Old Folders": {
+      "main": [
+        [
+          {
+            "node": "Exclude Current Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exclude Current Folder": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commit to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List All Workflows": {
+      "main": [
+        [
+          {
+            "node": "Split Workflow List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Workflow List": {
+      "main": [
+        [
+          {
+            "node": "Skip Archived",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Archived": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Workflow Detail": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Commit to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backup Complete": {
+      "main": [
+        [
+          {
+            "node": "Only One Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only One Item": {
+      "main": [
+        [
+          {
+            "node": "Notify Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Every Monday 07:00": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "dLCjLrzB5lbmau9B",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-11T23:09:20.335Z",
+      "updatedAt": "2026-09-11T23:09:20.335Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "1bf8e6a0-73a5-4311-a944-eca7f8b46cd8",
+    "workflowId": "dLCjLrzB5lbmau9B",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 7
+              }
+            ]
+          }
+        },
+        "id": "00bf2ba6-cb9b-46f3-a084-d71ba7990ab2",
+        "name": "Every Monday 07:00",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.4,
+        "position": [
+          -688,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "folder",
+          "name": "={{ 'Workflow Backups ' + $now.format('cccc t dd-MM-yyyy') }}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive",
+            "cachedResultName": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "root",
+            "cachedResultName": "/ (Root folder)"
+          },
+          "options": {}
+        },
+        "id": "74b4eb93-4478-4fe6-9a28-16c6859fd1fe",
+        "name": "Create New Folder",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          -512,
+          288
+        ],
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "fqaj1KELJO7yspxN",
+            "name": "Google Drive account"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "id": "720e8ea2-74b9-4994-817e-5bdd2c4d7e79",
+        "name": "Backup Complete",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          1152,
+          416
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "toJson",
+          "options": {
+            "format": true,
+            "fileName": "={{ $json.name }}"
+          }
+        },
+        "id": "4a9cf868-4718-4bd0-af47-849ddc080608",
+        "name": "Convert to File",
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1,
+        "position": [
+          832,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "name": "={{ $('Loop Over Items').item.json.name.replace(/\\.json$/i, '') + '.json' }}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive",
+            "cachedResultName": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('Create New Folder').item.json.id }}"
+          },
+          "options": {}
+        },
+        "id": "ae5e6fb9-f9ba-4356-9d47-27266430d482",
+        "name": "Upload to Drive",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          1056,
+          672
+        ],
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "fqaj1KELJO7yspxN",
+            "name": "Google Drive account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "da7706e9-1914-401c-838d-854919ab94c2",
+        "name": "Loop Over Items",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          384,
+          480
+        ]
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "resource": "file",
+          "owner": {
+            "__rl": true,
+            "mode": "name",
+            "value": "bintangazhar"
+          },
+          "repository": {
+            "__rl": true,
+            "mode": "name",
+            "value": "n8n-workflows"
+          },
+          "filePath": "={{ 'backups/' + $now.toFormat('yyyy-MM-dd') + '/' + $json.name.replace(/\\.json$/i, '') + '.json' }}",
+          "fileContent": "={{ JSON.stringify($json, null, 2) }}",
+          "commitMessage": "={{ 'Backup: ' + $json.name }}"
+        },
+        "id": "aeb061ce-c295-492f-b49d-527422bf68a9",
+        "name": "Commit to GitHub",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1.1,
+        "position": [
+          832,
+          288
+        ],
+        "webhookId": "835c9cf8-c336-4aed-beb9-97088f2334f0",
+        "credentials": {
+          "githubOAuth2Api": {
+            "id": "0SHYJ4ymiz5FIiJV",
+            "name": "GitHub account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "resource": "fileFolder",
+          "queryString": "Workflow Backups",
+          "filter": {
+            "folderId": {
+              "__rl": true,
+              "mode": "list",
+              "value": "root",
+              "cachedResultName": "/ (Root folder)"
+            },
+            "whatToSearch": "folders"
+          },
+          "options": {}
+        },
+        "id": "aea09f7b-fd54-4afb-8359-b85d7b370a16",
+        "name": "Get Old Folders",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          -288,
+          240
+        ],
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "fqaj1KELJO7yspxN",
+            "name": "Google Drive account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.id }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                },
+                "rightValue": "={{ $('Create New Folder').item.json.id }}"
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {
+            "ignoreCase": true
+          }
+        },
+        "id": "81377c77-61a5-4c17-ac33-a17de97c6f4c",
+        "name": "Exclude Current Folder",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          -64,
+          240
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "folder",
+          "operation": "deleteFolder",
+          "folderNoRootId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $json.id }}"
+          },
+          "options": {
+            "deletePermanently": true
+          }
+        },
+        "id": "0ddb3160-88ef-492a-aef1-e50f2f218b2a",
+        "name": "Delete Old Folder",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          160,
+          240
+        ],
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "fqaj1KELJO7yspxN",
+            "name": "Google Drive account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "content": "## Weekly n8n Backup\n\nBerdasarkan template n8n.io \"Backup all n8n workflows to Google Drive\" — diadaptasi jadi mingguan + tambahan GitHub.\n\n1. Kredensial: Header Auth (X-N8N-API-KEY) untuk n8n REST API, Google Drive OAuth2, GitHub OAuth2\n2. Pakai HTTP Request 2-tahap (List All Workflows -> Get Workflow Detail per ID), BUKAN node n8n native — node n8n native terbukti tidak scan workflow yang ada di dalam folder\n3. Workflow yang isArchived=true otomatis di-skip (node \"Skip Archived\")\n4. Folder Drive lama otomatis dihapus tiap run supaya gak numpuk\n5. Ganti owner/repository GitHub sesuai repo backup kamu\n6. Isi folderId \"Create New Folder\" & \"Get Old Folders\" ke folder khusus jika tidak mau di root Drive",
+          "height": 624,
+          "color": 5
+        },
+        "id": "bc1b4fa7-0461-48fb-bd6d-d7917aec0152",
+        "name": "Sticky Note 122a69e4",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -1024,
+          192
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://n8n.bintang.me/api/v1/workflows",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "limit",
+                "value": "250"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "1414f0b2-07c4-469d-9e76-db4da3188f75",
+        "name": "List All Workflows",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          -288,
+          432
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oAKTg416qzwkR3Sw",
+            "name": "n8n-api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "data",
+          "options": {}
+        },
+        "id": "998b8e01-1dfa-4b6f-a80d-f318c15911a6",
+        "name": "Split Workflow List",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          -64,
+          432
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "leftValue": "={{ $json.isArchived }}",
+                "operator": {
+                  "operation": "false",
+                  "type": "boolean"
+                },
+                "rightValue": ""
+              }
+            ],
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            }
+          },
+          "looseTypeValidation": true,
+          "options": {
+            "ignoreCase": true
+          }
+        },
+        "id": "443e4ad7-b47a-48ad-97f0-20972eb27abe",
+        "name": "Skip Archived",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          160,
+          432
+        ]
+      },
+      {
+        "parameters": {
+          "url": "={{ 'https://n8n.bintang.me/api/v1/workflows/' + $json.id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "id": "51d66fb8-ca43-4227-a3d6-17b06e2d2124",
+        "name": "Get Workflow Detail",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          544,
+          160
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oAKTg416qzwkR3Sw",
+            "name": "n8n-api"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "588062764",
+          "text": "=✅ *Backup n8n mingguan selesai*\n\n📅 Tanggal: {{ $now.format('dd MMMM yyyy, HH:mm') }}\n\nTersimpan di GitHub & Google Drive.",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "Markdown"
+          }
+        },
+        "id": "4fa25c49-3a9b-42b4-87bb-fee5afc7dd54",
+        "name": "Notify Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1504,
+          416
+        ],
+        "webhookId": "1056b792-6edb-4ccb-a475-419e6965f3fb",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "keep": "lastItems"
+        },
+        "id": "48818984-7c4e-4c5b-bce6-0f0c7791fe57",
+        "name": "Only One Item",
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1,
+        "position": [
+          1328,
+          416
+        ]
+      }
+    ],
+    "connections": {
+      "Every Monday 07:00": {
+        "main": [
+          [
+            {
+              "node": "Create New Folder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create New Folder": {
+        "main": [
+          [
+            {
+              "node": "Get Old Folders",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "List All Workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert to File": {
+        "main": [
+          [
+            {
+              "node": "Upload to Drive",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload to Drive": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [
+            {
+              "node": "Backup Complete",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Workflow Detail",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Old Folders": {
+        "main": [
+          [
+            {
+              "node": "Exclude Current Folder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Exclude Current Folder": {
+        "main": [
+          [
+            {
+              "node": "Delete Old Folder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Commit to GitHub": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "List All Workflows": {
+        "main": [
+          [
+            {
+              "node": "Split Workflow List",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Workflow List": {
+        "main": [
+          [
+            {
+              "node": "Skip Archived",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Skip Archived": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Workflow Detail": {
+        "main": [
+          [
+            {
+              "node": "Convert to File",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Commit to GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Backup Complete": {
+        "main": [
+          [
+            {
+              "node": "Only One Item",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Only One Item": {
+        "main": [
+          [
+            {
+              "node": "Notify Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar",
+    "name": "Version 1bf8e6a0",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-11T23:49:06.604Z",
+    "updatedAt": "2026-09-11T23:50:30.426Z",
+    "workflowPublishHistory": [
+      {
+        "id": 213,
+        "workflowId": "dLCjLrzB5lbmau9B",
+        "versionId": "1bf8e6a0-73a5-4311-a944-eca7f8b46cd8",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T23:50:30.405Z"
+      }
+    ]
+  }
+}
