@@ -1,0 +1,242 @@
+{
+  "id": "jRjQXaIiK8J5j6ig",
+  "name": "Error Notifier",
+  "description": null,
+  "active": true,
+  "activeVersionId": "3cf660de-25e7-4336-9b2d-b6e61601c20b",
+  "createdAt": "2026-09-09T16:35:36.510Z",
+  "updatedAt": "2026-09-11T22:43:08.900Z",
+  "isArchived": false,
+  "versionId": "3cf660de-25e7-4336-9b2d-b6e61601c20b",
+  "versionCounter": 3,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "114d8911-19d9-4f7f-a1aa-c4b11c921805",
+      "name": "On Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "message",
+              "value": "=🚨 *Workflow Error*\n\n📛 *Workflow:* {{ $json.workflow.name }}\n🔧 *Node:* {{ $json.execution.lastNodeExecuted }}\n🕒 *Waktu:* {{ $now.format('dd MMM yyyy, HH:mm:ss') }}\n\n❗ *Error:*\n`{{ $json.execution.error.message || 'Unknown error' }}`\n\n🔗 *Detail:* {{ $json.execution.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "284f8ab9-75a1-4157-9d13-23f81277b91a",
+      "name": "Build Error Message"
+    },
+    {
+      "parameters": {
+        "chatId": "588062764",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        },
+        "notes": "chatId here is hardcoded to your own Telegram ID (same as the Allow List in Main Router), so error notifications still get sent even when the error's cause is in the Allow List/routing path itself."
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "4e6fb08d-5305-4a57-aaf7-e81857b898e9",
+      "name": "Notify via Telegram",
+      "webhookId": "0dca0765-00ec-491b-99a3-1c40f4c56b75",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "chatId di sini hardcode ke ID Telegram kamu sendiri (sama seperti Allow List di Main Router), supaya notifikasi error tetap terkirim meski penyebab error ada di jalur Allow List/routing itu sendiri."
+    }
+  ],
+  "connections": {
+    "On Error": {
+      "main": [
+        [
+          {
+            "node": "Build Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Error Message": {
+      "main": [
+        [
+          {
+            "node": "Notify via Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "jRjQXaIiK8J5j6ig",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T16:35:36.510Z",
+      "updatedAt": "2026-09-09T16:35:36.510Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "3cf660de-25e7-4336-9b2d-b6e61601c20b",
+    "workflowId": "jRjQXaIiK8J5j6ig",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "114d8911-19d9-4f7f-a1aa-c4b11c921805",
+        "name": "On Error"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1",
+                "name": "message",
+                "value": "=🚨 *Workflow Error*\n\n📛 *Workflow:* {{ $json.workflow.name }}\n🔧 *Node:* {{ $json.execution.lastNodeExecuted }}\n🕒 *Waktu:* {{ $now.format('dd MMM yyyy, HH:mm:ss') }}\n\n❗ *Error:*\n`{{ $json.execution.error.message || 'Unknown error' }}`\n\n🔗 *Detail:* {{ $json.execution.url }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          0
+        ],
+        "id": "284f8ab9-75a1-4157-9d13-23f81277b91a",
+        "name": "Build Error Message"
+      },
+      {
+        "parameters": {
+          "chatId": "588062764",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "Markdown"
+          },
+          "notes": "chatId here is hardcoded to your own Telegram ID (same as the Allow List in Main Router), so error notifications still get sent even when the error's cause is in the Allow List/routing path itself."
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          448,
+          0
+        ],
+        "id": "4e6fb08d-5305-4a57-aaf7-e81857b898e9",
+        "name": "Notify via Telegram",
+        "webhookId": "0dca0765-00ec-491b-99a3-1c40f4c56b75",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        },
+        "notes": "chatId di sini hardcode ke ID Telegram kamu sendiri (sama seperti Allow List di Main Router), supaya notifikasi error tetap terkirim meski penyebab error ada di jalur Allow List/routing itu sendiri."
+      }
+    ],
+    "connections": {
+      "On Error": {
+        "main": [
+          [
+            {
+              "node": "Build Error Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Error Message": {
+        "main": [
+          [
+            {
+              "node": "Notify via Telegram",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Translate node note to English",
+    "description": "Dev note on Notify via Telegram was in Indonesian; translated. No functional change.",
+    "autosaved": false,
+    "createdAt": "2026-09-11T22:43:08.902Z",
+    "updatedAt": "2026-09-11T22:43:08.902Z",
+    "workflowPublishHistory": [
+      {
+        "id": 191,
+        "workflowId": "jRjQXaIiK8J5j6ig",
+        "versionId": "3cf660de-25e7-4336-9b2d-b6e61601c20b",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T22:43:34.428Z"
+      }
+    ]
+  }
+}
