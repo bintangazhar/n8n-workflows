@@ -1,0 +1,815 @@
+{
+  "id": "htPVEbya5KlmWMbR",
+  "name": "SW - Receipt OCR",
+  "description": null,
+  "active": true,
+  "activeVersionId": "7d678354-a8d7-4c37-8339-30638d332895",
+  "createdAt": "2026-09-09T15:28:59.205Z",
+  "updatedAt": "2026-09-11T22:43:22.357Z",
+  "isArchived": false,
+  "versionId": "7d678354-a8d7-4c37-8339-30638d332895",
+  "versionCounter": 27,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatId"
+            },
+            {
+              "name": "fileId"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1888,
+        240
+      ],
+      "id": "ed1e84a2-c0ea-47a9-a231-d130a5aac5c8",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.fileId }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1664,
+        240
+      ],
+      "id": "7dfc1787-b1a1-40f6-9437-2a53cce781a5",
+      "name": "Get Photo File",
+      "webhookId": "e11767f1-044a-4c49-91cf-7a2e8f4d8f9d",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=Analyze this shopping receipt. Reply in EXACTLY this format (no other text):\n\nTOKO: [store name]\nTOTAL: [amount only, no Rp/dots]\nITEMS: [items purchased, copy EXACTLY as written including punctuation in names, comma-separated]\nTANGGAL: [YYYY-MM-DD format, convert from any format on the receipt. If no date visible → {{ $now.format('yyyy-MM-dd') }}]\n\nExample:\nTOKO: Alfamart\nTOTAL: 25500\nITEMS: Susu Ultra 1L, Roti Tawar, Sabun Lifebuoy, Pembayaran QRIS\nTANGGAL: 2025-06-19\n\nIf unreadable, reply only:\nERROR: Struk tidak dapat dibaca dengan jelas",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1440,
+        240
+      ],
+      "id": "938cd95a-b36a-4aaf-9e4a-b1be58e9b44b",
+      "name": "Analyze Receipt Image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QVYkHlJCbUcVHNDj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Back to regex parsing of the TOKO:/TOTAL:/ITEMS:/TANGGAL: text format\n// (proven more accurate at reading item names than asking Gemini to reply with JSON directly).\nconst raw = $input.first().json.content.parts[0].text;\n\nif (raw.includes('ERROR:')) {\n  return [{ json: { ok: false, reason: raw.replace(/ERROR:\\s*/, '').trim() } }];\n}\n\nconst tokoMatch = raw.match(/TOKO:\\s*(.+)/);\nconst totalMatch = raw.match(/TOTAL:\\s*(.+)/);\nconst itemsMatch = raw.match(/ITEMS:\\s*(.+)/);\nconst tanggalMatch = raw.match(/TANGGAL:\\s*(.+)/);\n\nconst toko = tokoMatch ? tokoMatch[1].trim() : '';\n// Total cleaned of any leftover 'Rp' or thousands separators the model might slip in\nconst total = totalMatch ? totalMatch[1].replace(/[^0-9]/g, '').trim() : '';\nconst items = itemsMatch ? itemsMatch[1].trim() : '';\nlet tanggal = tanggalMatch ? tanggalMatch[1].trim() : '';\n\n// Safety net: required fields (toko & total) empty means parsing failed entirely,\n// even if the model didn't explicitly say ERROR.\nif (!toko || !total) {\n  return [{ json: { ok: false, reason: 'Failed to parse the AI response format (toko/total empty).' } }];\n}\n\n// Second safety net: date is still required, even though the prompt already asks the AI to fill it in itself.\nif (!tanggal) {\n  tanggal = $now.format('yyyy-MM-dd');\n}\nif (!items) items = '-';\n\nreturn [{ json: { ok: true, toko, total, items, tanggal } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1216,
+        240
+      ],
+      "id": "043cbfc1-6aa5-45b0-80fc-e1396da72c41",
+      "name": "Parse Receipt Text"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {},
+        "notes": "Now also checks that total is not empty, not just ok=true, so a JSON that's 'ok' but has incomplete data is still treated as a failed read."
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -992,
+        240
+      ],
+      "id": "2f397eab-c186-4b31-972e-0492dd090f0d",
+      "name": "Read OK?",
+      "notes": "Sekarang juga cek total tidak kosong, bukan cuma ok=true, supaya JSON yang 'ok' tapi datanya gak lengkap tetap dianggap gagal baca."
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU",
+          "mode": "list",
+          "cachedResultName": "Catatan Belanja",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Pengeluaran",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Toko": "={{ $json.toko }}",
+            "Total": "={{ $json.total }}",
+            "Items": "={{ $json.items }}",
+            "Tanggal Struk": "={{ $json.tanggal }}",
+            "Tanggal Input": "={{ $now.format('yyyy-MM-dd') }}",
+            "Waktu Input": "={{ $now.format('HH:mm:ss') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Toko",
+              "displayName": "Toko",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Items",
+              "displayName": "Items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tanggal Struk",
+              "displayName": "Tanggal Struk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tanggal Input",
+              "displayName": "Tanggal Input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Waktu Input",
+              "displayName": "Waktu Input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {},
+        "notes": "Appending directly here (instead of via Execute Sub-workflow to SW - Expense Logger) so there's no more cross-workflow mapping breakpoint for data coming from receipt photos."
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -768,
+        144
+      ],
+      "id": "35ef5f13-adfd-4474-b6f7-37cd54abc797",
+      "name": "Append to Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Append langsung di sini (bukan lewat Execute Sub-workflow ke SW - Expense Logger) supaya tidak ada lagi titik putus mapping antar-workflow untuk data yang datang dari foto struk."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "r2",
+              "name": "message",
+              "value": "=✅ *Data struk belanja berhasil disimpan!*\n\n🏭 *Toko:* {{ $('Parse Receipt Text').item.json.toko }}\n📅 *Tanggal:* {{ $('Parse Receipt Text').item.json.tanggal }}\n📦 *Items:* {{ $('Parse Receipt Text').item.json.items }}\n💰 *Total:* Rp{{ $('Parse Receipt Text').item.json.total }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -544,
+        144
+      ],
+      "id": "fd998d45-ecda-45a8-86eb-cbb022994972",
+      "name": "Build Success Result"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r3",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "r4",
+              "name": "message",
+              "value": "=❌ Struk tidak dapat dibaca dengan jelas.\n\n- Pastikan struk jelas dan tidak blur\n- Pencahayaan cukup\n- Semua text terlihat\n\nSilakan coba foto ulang! 📸",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -768,
+        336
+      ],
+      "id": "e823bc36-3585-4505-a82b-4d47f5cc0ce0",
+      "name": "Build Read-Fail Result"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get Photo File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Photo File": {
+      "main": [
+        [
+          {
+            "node": "Analyze Receipt Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Receipt Image": {
+      "main": [
+        [
+          {
+            "node": "Parse Receipt Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read OK?": {
+      "main": [
+        [
+          {
+            "node": "Append to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Read-Fail Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Build Success Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Receipt Text": {
+      "main": [
+        [
+          {
+            "node": "Read OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "jRjQXaIiK8J5j6ig",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "htPVEbya5KlmWMbR",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T15:28:59.205Z",
+      "updatedAt": "2026-09-09T15:28:59.205Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "7d678354-a8d7-4c37-8339-30638d332895",
+    "workflowId": "htPVEbya5KlmWMbR",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chatId"
+              },
+              {
+                "name": "fileId"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -1888,
+          240
+        ],
+        "id": "ed1e84a2-c0ea-47a9-a231-d130a5aac5c8",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "fileId": "={{ $json.fileId }}",
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          -1664,
+          240
+        ],
+        "id": "7dfc1787-b1a1-40f6-9437-2a53cce781a5",
+        "name": "Get Photo File",
+        "webhookId": "e11767f1-044a-4c49-91cf-7a2e8f4d8f9d",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "image",
+          "operation": "analyze",
+          "modelId": {
+            "__rl": true,
+            "value": "models/gemini-2.5-flash",
+            "mode": "list",
+            "cachedResultName": "models/gemini-2.5-flash"
+          },
+          "text": "=Analyze this shopping receipt. Reply in EXACTLY this format (no other text):\n\nTOKO: [store name]\nTOTAL: [amount only, no Rp/dots]\nITEMS: [items purchased, copy EXACTLY as written including punctuation in names, comma-separated]\nTANGGAL: [YYYY-MM-DD format, convert from any format on the receipt. If no date visible → {{ $now.format('yyyy-MM-dd') }}]\n\nExample:\nTOKO: Alfamart\nTOTAL: 25500\nITEMS: Susu Ultra 1L, Roti Tawar, Sabun Lifebuoy, Pembayaran QRIS\nTANGGAL: 2025-06-19\n\nIf unreadable, reply only:\nERROR: Struk tidak dapat dibaca dengan jelas",
+          "inputType": "binary",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.googleGemini",
+        "typeVersion": 1,
+        "position": [
+          -1440,
+          240
+        ],
+        "id": "938cd95a-b36a-4aaf-9e4a-b1be58e9b44b",
+        "name": "Analyze Receipt Image",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "QVYkHlJCbUcVHNDj",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Back to regex parsing of the TOKO:/TOTAL:/ITEMS:/TANGGAL: text format\n// (proven more accurate at reading item names than asking Gemini to reply with JSON directly).\nconst raw = $input.first().json.content.parts[0].text;\n\nif (raw.includes('ERROR:')) {\n  return [{ json: { ok: false, reason: raw.replace(/ERROR:\\s*/, '').trim() } }];\n}\n\nconst tokoMatch = raw.match(/TOKO:\\s*(.+)/);\nconst totalMatch = raw.match(/TOTAL:\\s*(.+)/);\nconst itemsMatch = raw.match(/ITEMS:\\s*(.+)/);\nconst tanggalMatch = raw.match(/TANGGAL:\\s*(.+)/);\n\nconst toko = tokoMatch ? tokoMatch[1].trim() : '';\n// Total cleaned of any leftover 'Rp' or thousands separators the model might slip in\nconst total = totalMatch ? totalMatch[1].replace(/[^0-9]/g, '').trim() : '';\nconst items = itemsMatch ? itemsMatch[1].trim() : '';\nlet tanggal = tanggalMatch ? tanggalMatch[1].trim() : '';\n\n// Safety net: required fields (toko & total) empty means parsing failed entirely,\n// even if the model didn't explicitly say ERROR.\nif (!toko || !total) {\n  return [{ json: { ok: false, reason: 'Failed to parse the AI response format (toko/total empty).' } }];\n}\n\n// Second safety net: date is still required, even though the prompt already asks the AI to fill it in itself.\nif (!tanggal) {\n  tanggal = $now.format('yyyy-MM-dd');\n}\nif (!items) items = '-';\n\nreturn [{ json: { ok: true, toko, total, items, tanggal } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1216,
+          240
+        ],
+        "id": "043cbfc1-6aa5-45b0-80fc-e1396da72c41",
+        "name": "Parse Receipt Text"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "c2",
+                "leftValue": "={{ $json.total }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {},
+          "notes": "Now also checks that total is not empty, not just ok=true, so a JSON that's 'ok' but has incomplete data is still treated as a failed read."
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -992,
+          240
+        ],
+        "id": "2f397eab-c186-4b31-972e-0492dd090f0d",
+        "name": "Read OK?",
+        "notes": "Sekarang juga cek total tidak kosong, bukan cuma ok=true, supaya JSON yang 'ok' tapi datanya gak lengkap tetap dianggap gagal baca."
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU",
+            "mode": "list",
+            "cachedResultName": "Catatan Belanja",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Pengeluaran",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Toko": "={{ $json.toko }}",
+              "Total": "={{ $json.total }}",
+              "Items": "={{ $json.items }}",
+              "Tanggal Struk": "={{ $json.tanggal }}",
+              "Tanggal Input": "={{ $now.format('yyyy-MM-dd') }}",
+              "Waktu Input": "={{ $now.format('HH:mm:ss') }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Toko",
+                "displayName": "Toko",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Total",
+                "displayName": "Total",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Items",
+                "displayName": "Items",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Tanggal Struk",
+                "displayName": "Tanggal Struk",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Tanggal Input",
+                "displayName": "Tanggal Input",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Waktu Input",
+                "displayName": "Waktu Input",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {},
+          "notes": "Appending directly here (instead of via Execute Sub-workflow to SW - Expense Logger) so there's no more cross-workflow mapping breakpoint for data coming from receipt photos."
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          -768,
+          144
+        ],
+        "id": "35ef5f13-adfd-4474-b6f7-37cd54abc797",
+        "name": "Append to Sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "7k6H6iPtMGHICq5n",
+            "name": "Google Sheets account"
+          }
+        },
+        "notes": "Append langsung di sini (bukan lewat Execute Sub-workflow ke SW - Expense Logger) supaya tidak ada lagi titik putus mapping antar-workflow untuk data yang datang dari foto struk."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1",
+                "name": "ok",
+                "value": true,
+                "type": "boolean"
+              },
+              {
+                "id": "r2",
+                "name": "message",
+                "value": "=✅ *Data struk belanja berhasil disimpan!*\n\n🏭 *Toko:* {{ $('Parse Receipt Text').item.json.toko }}\n📅 *Tanggal:* {{ $('Parse Receipt Text').item.json.tanggal }}\n📦 *Items:* {{ $('Parse Receipt Text').item.json.items }}\n💰 *Total:* Rp{{ $('Parse Receipt Text').item.json.total }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -544,
+          144
+        ],
+        "id": "fd998d45-ecda-45a8-86eb-cbb022994972",
+        "name": "Build Success Result"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r3",
+                "name": "ok",
+                "value": false,
+                "type": "boolean"
+              },
+              {
+                "id": "r4",
+                "name": "message",
+                "value": "=❌ Struk tidak dapat dibaca dengan jelas.\n\n- Pastikan struk jelas dan tidak blur\n- Pencahayaan cukup\n- Semua text terlihat\n\nSilakan coba foto ulang! 📸",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -768,
+          336
+        ],
+        "id": "e823bc36-3585-4505-a82b-4d47f5cc0ce0",
+        "name": "Build Read-Fail Result"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Get Photo File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Photo File": {
+        "main": [
+          [
+            {
+              "node": "Analyze Receipt Image",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analyze Receipt Image": {
+        "main": [
+          [
+            {
+              "node": "Parse Receipt Text",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read OK?": {
+        "main": [
+          [
+            {
+              "node": "Append to Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Build Read-Fail Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Append to Sheet": {
+        "main": [
+          [
+            {
+              "node": "Build Success Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Receipt Text": {
+        "main": [
+          [
+            {
+              "node": "Read OK?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Translate code comments and node notes to English",
+    "description": "Code comments in Parse Receipt Text and dev notes on Read OK?/Append to Sheet were in Indonesian; translated. Logic, regex, and field names (TOKO/TOTAL/ITEMS/TANGGAL, which match the sheet's actual column headers) left unchanged since those are functional, not instructional.",
+    "autosaved": false,
+    "createdAt": "2026-09-11T22:43:22.363Z",
+    "updatedAt": "2026-09-11T22:43:22.363Z",
+    "workflowPublishHistory": [
+      {
+        "id": 193,
+        "workflowId": "htPVEbya5KlmWMbR",
+        "versionId": "7d678354-a8d7-4c37-8339-30638d332895",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T22:43:35.156Z"
+      }
+    ]
+  }
+}
