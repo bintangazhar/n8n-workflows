@@ -1,0 +1,756 @@
+{
+  "id": "viaV9W7NE0hKIGQR",
+  "name": "Site Uptime Monitor",
+  "description": "Checks nusantarapost.news and klikwartaku.com every 5 minutes for downtime, connection errors, or HTTP 404, and alerts via Telegram on state change.",
+  "active": true,
+  "activeVersionId": "5a3f5619-e2c9-439f-9c22-828049d31639",
+  "createdAt": "2026-09-11T22:51:44.892Z",
+  "updatedAt": "2026-09-19T08:51:38.249Z",
+  "isArchived": false,
+  "versionId": "5a3f5619-e2c9-439f-9c22-828049d31639",
+  "versionCounter": 13,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "4241c930-efd4-43bf-b275-702c56e1a538",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { name: 'Nusantara Post', url: 'https://www.nusantarapost.news', redisKey: 'uptime:nusantarapost' } },\n  { json: { name: 'Klik Wartaku', url: 'https://klikwartaku.com', redisKey: 'uptime:klikwartaku' } }\n];"
+      },
+      "id": "e6bb6462-fa6d-45b0-9324-8985308f6a0a",
+      "name": "Site List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "a63f110f-f151-4f4d-a5a7-a2ab4ba929fc",
+      "name": "Check Site",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        96
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const statusCode = $json.statusCode;\nconst name = $('Site List').item.json.name;\nconst url = $('Site List').item.json.url;\nconst redisKey = $('Site List').item.json.redisKey;\nconst isUp = statusCode >= 200 && statusCode < 400;\nconst status = isUp ? 'up' : 'down';\nconst reason = isUp ? '' : ('HTTP ' + statusCode);\nreturn { json: { name, url, redisKey, status, reason } };"
+      },
+      "id": "aa655e96-39ab-4b77-b15e-5e45a915bcce",
+      "name": "Evaluate HTTP Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "642b83bd-761a-4a96-9d16-25acc9bd3ba5",
+      "name": "Combine Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const name = $('Site List').item.json.name;\nconst url = $('Site List').item.json.url;\nconst redisKey = $('Site List').item.json.redisKey;\nconst errorMessage = $json.error ? String($json.error) : 'Connection failed (timeout or DNS error)';\nreturn { json: { name, url, redisKey, status: 'down', reason: errorMessage } };",
+        "parameters": {
+          "jsCode": "const name = $('Site List').item.json.name;\nconst url = $('Site List').item.json.url;\nconst redisKey = $('Site List').item.json.redisKey;\nconst errorMessage = $json.error?.message ? $json.error.message : 'Connection failed (timeout or DNS error)';\nreturn { json: { name, url, redisKey, status: 'down', reason: errorMessage } };"
+        }
+      },
+      "id": "8c8d8a28-07fe-48a2-bca2-27b7d7ed4ffe",
+      "name": "Evaluate Connection Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "lastStatus",
+        "key": "={{ $json.redisKey }}",
+        "keyType": "string",
+        "options": {}
+      },
+      "id": "d7d3f11a-be08-460d-bfa4-55cbdd2051ec",
+      "name": "Get Last Status",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        112
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5NS1D9tzoWKw4XNC",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const name = $('Combine Results').item.json.name;\nconst url = $('Combine Results').item.json.url;\nconst redisKey = $('Combine Results').item.json.redisKey;\nconst status = $('Combine Results').item.json.status;\nconst reason = $('Combine Results').item.json.reason;\nconst lastStatus = $json.lastStatus;\n\nconst isFirstCheck = lastStatus === undefined || lastStatus === null || lastStatus === '';\nconst changed = !isFirstCheck && lastStatus !== status;\n\nlet shouldAlert = false;\nlet message = '';\n\nif (changed) {\n  shouldAlert = true;\n  const timeLabel = $now.toFormat('dd MMM yyyy HH:mm') + ' WIB';\n  if (status === 'down') {\n    message = '*DOWN* ' + name + '\\n' + url + '\\nReason: ' + reason + '\\nTime: ' + timeLabel;\n  } else {\n    message = '*RECOVERED* ' + name + '\\n' + url + '\\nBack up at: ' + timeLabel;\n  }\n}\n\nreturn { json: { name, url, redisKey, status, reason, shouldAlert, message } };"
+      },
+      "id": "c667c9cb-ab32-462d-a4b7-9281780a1260",
+      "name": "Determine Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $json.redisKey }}",
+        "value": "={{ $json.status }}"
+      },
+      "id": "d2fb6033-6bbf-40b9-b22b-667cc74ba42f",
+      "name": "Save Current Status",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        96
+      ],
+      "credentials": {
+        "redis": {
+          "id": "5NS1D9tzoWKw4XNC",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.shouldAlert }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "rightValue": true,
+              "id": "c16dde9a-c69d-4ac8-a0e9-1774958913a4"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9c124c77-9904-4f7a-9607-126532f30675",
+      "name": "Should Alert?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "588062764",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "31bd48c7-32ef-461a-b01e-931128af9a1c",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        0
+      ],
+      "webhookId": "1cb5ef61-1f75-4291-bf8a-ac6a0522de6f",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Site List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Site List": {
+      "main": [
+        [
+          {
+            "node": "Check Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Site": {
+      "main": [
+        [
+          {
+            "node": "Evaluate HTTP Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evaluate Connection Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate HTTP Response": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Results": {
+      "main": [
+        [
+          {
+            "node": "Get Last Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Connection Error": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Last Status": {
+      "main": [
+        [
+          {
+            "node": "Determine Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Alert": {
+      "main": [
+        [
+          {
+            "node": "Save Current Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Current Status": {
+      "main": [
+        [
+          {
+            "node": "Should Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Alert?": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "jRjQXaIiK8J5j6ig",
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Every 5 Minutes": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "viaV9W7NE0hKIGQR",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-11T22:51:44.892Z",
+      "updatedAt": "2026-09-11T22:51:44.892Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "5a3f5619-e2c9-439f-9c22-828049d31639",
+    "workflowId": "viaV9W7NE0hKIGQR",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "id": "4241c930-efd4-43bf-b275-702c56e1a538",
+        "name": "Every 5 Minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.4,
+        "position": [
+          0,
+          96
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  { json: { name: 'Nusantara Post', url: 'https://www.nusantarapost.news', redisKey: 'uptime:nusantarapost' } },\n  { json: { name: 'Klik Wartaku', url: 'https://klikwartaku.com', redisKey: 'uptime:klikwartaku' } }\n];"
+        },
+        "id": "e6bb6462-fa6d-45b0-9324-8985308f6a0a",
+        "name": "Site List",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          96
+        ]
+      },
+      {
+        "parameters": {
+          "url": "={{ $json.url }}",
+          "options": {
+            "redirect": {
+              "redirect": {}
+            },
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true,
+                "responseFormat": "text"
+              }
+            },
+            "timeout": 15000
+          }
+        },
+        "id": "a63f110f-f151-4f4d-a5a7-a2ab4ba929fc",
+        "name": "Check Site",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.5,
+        "position": [
+          448,
+          96
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const statusCode = $json.statusCode;\nconst name = $('Site List').item.json.name;\nconst url = $('Site List').item.json.url;\nconst redisKey = $('Site List').item.json.redisKey;\nconst isUp = statusCode >= 200 && statusCode < 400;\nconst status = isUp ? 'up' : 'down';\nconst reason = isUp ? '' : ('HTTP ' + statusCode);\nreturn { json: { name, url, redisKey, status, reason } };"
+        },
+        "id": "aa655e96-39ab-4b77-b15e-5e45a915bcce",
+        "name": "Evaluate HTTP Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          0
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "642b83bd-761a-4a96-9d16-25acc9bd3ba5",
+        "name": "Combine Results",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          896,
+          96
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const name = $('Site List').item.json.name;\nconst url = $('Site List').item.json.url;\nconst redisKey = $('Site List').item.json.redisKey;\nconst errorMessage = $json.error ? String($json.error) : 'Connection failed (timeout or DNS error)';\nreturn { json: { name, url, redisKey, status: 'down', reason: errorMessage } };",
+          "parameters": {
+            "jsCode": "const name = $('Site List').item.json.name;\nconst url = $('Site List').item.json.url;\nconst redisKey = $('Site List').item.json.redisKey;\nconst errorMessage = $json.error?.message ? $json.error.message : 'Connection failed (timeout or DNS error)';\nreturn { json: { name, url, redisKey, status: 'down', reason: errorMessage } };"
+          }
+        },
+        "id": "8c8d8a28-07fe-48a2-bca2-27b7d7ed4ffe",
+        "name": "Evaluate Connection Error",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          224
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "propertyName": "lastStatus",
+          "key": "={{ $json.redisKey }}",
+          "keyType": "string",
+          "options": {}
+        },
+        "id": "d7d3f11a-be08-460d-bfa4-55cbdd2051ec",
+        "name": "Get Last Status",
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1,
+        "position": [
+          1120,
+          112
+        ],
+        "credentials": {
+          "redis": {
+            "id": "5NS1D9tzoWKw4XNC",
+            "name": "Redis account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const name = $('Combine Results').item.json.name;\nconst url = $('Combine Results').item.json.url;\nconst redisKey = $('Combine Results').item.json.redisKey;\nconst status = $('Combine Results').item.json.status;\nconst reason = $('Combine Results').item.json.reason;\nconst lastStatus = $json.lastStatus;\n\nconst isFirstCheck = lastStatus === undefined || lastStatus === null || lastStatus === '';\nconst changed = !isFirstCheck && lastStatus !== status;\n\nlet shouldAlert = false;\nlet message = '';\n\nif (changed) {\n  shouldAlert = true;\n  const timeLabel = $now.toFormat('dd MMM yyyy HH:mm') + ' WIB';\n  if (status === 'down') {\n    message = '*DOWN* ' + name + '\\n' + url + '\\nReason: ' + reason + '\\nTime: ' + timeLabel;\n  } else {\n    message = '*RECOVERED* ' + name + '\\n' + url + '\\nBack up at: ' + timeLabel;\n  }\n}\n\nreturn { json: { name, url, redisKey, status, reason, shouldAlert, message } };"
+        },
+        "id": "c667c9cb-ab32-462d-a4b7-9281780a1260",
+        "name": "Determine Alert",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1344,
+          96
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "set",
+          "key": "={{ $json.redisKey }}",
+          "value": "={{ $json.status }}"
+        },
+        "id": "d2fb6033-6bbf-40b9-b22b-667cc74ba42f",
+        "name": "Save Current Status",
+        "type": "n8n-nodes-base.redis",
+        "typeVersion": 1,
+        "position": [
+          1568,
+          96
+        ],
+        "credentials": {
+          "redis": {
+            "id": "5NS1D9tzoWKw4XNC",
+            "name": "Redis account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.shouldAlert }}",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                },
+                "rightValue": true,
+                "id": "c16dde9a-c69d-4ac8-a0e9-1774958913a4"
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "9c124c77-9904-4f7a-9607-126532f30675",
+        "name": "Should Alert?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1792,
+          112
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "588062764",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "Markdown"
+          }
+        },
+        "id": "31bd48c7-32ef-461a-b01e-931128af9a1c",
+        "name": "Send Alert",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2080,
+          0
+        ],
+        "webhookId": "1cb5ef61-1f75-4291-bf8a-ac6a0522de6f",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Every 5 Minutes": {
+        "main": [
+          [
+            {
+              "node": "Site List",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Site List": {
+        "main": [
+          [
+            {
+              "node": "Check Site",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Site": {
+        "main": [
+          [
+            {
+              "node": "Evaluate HTTP Response",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Evaluate Connection Error",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Evaluate HTTP Response": {
+        "main": [
+          [
+            {
+              "node": "Combine Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combine Results": {
+        "main": [
+          [
+            {
+              "node": "Get Last Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Evaluate Connection Error": {
+        "main": [
+          [
+            {
+              "node": "Combine Results",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Get Last Status": {
+        "main": [
+          [
+            {
+              "node": "Determine Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Determine Alert": {
+        "main": [
+          [
+            {
+              "node": "Save Current Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save Current Status": {
+        "main": [
+          [
+            {
+              "node": "Should Alert?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Should Alert?": {
+        "main": [
+          [
+            {
+              "node": "Send Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Fix [object Object] in connection error reason",
+    "description": "Evaluate Connection Error now reads $json.error.message instead of stringifying the whole error object, which was producing '[object Object]' in Telegram alerts.",
+    "autosaved": false,
+    "createdAt": "2026-09-19T08:51:38.252Z",
+    "updatedAt": "2026-09-19T08:52:08.912Z",
+    "workflowPublishHistory": [
+      {
+        "id": 221,
+        "workflowId": "viaV9W7NE0hKIGQR",
+        "versionId": "5a3f5619-e2c9-439f-9c22-828049d31639",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-19T08:52:08.900Z"
+      }
+    ]
+  }
+}
