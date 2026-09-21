@@ -1,0 +1,448 @@
+{
+  "id": "6JFvKhXGRptCniR1",
+  "name": "Sortir Foto Klien - Google Drive",
+  "description": "Form order sortir foto dari klien (kode DSC atau angka), matching otomatis ke file di Drive source, copy ke folder cetak, dengan log order dan ringkasan email untuk item ambigu/tidak ditemukan.",
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-14T11:10:04.524Z",
+  "updatedAt": "2026-09-14T11:27:25.507Z",
+  "isArchived": false,
+  "versionId": "f9361d59-29a9-48e3-853d-e5e06d35a188",
+  "versionCounter": 5,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Order Sortir Foto",
+        "formDescription": "Masukkan daftar kode/nomor foto yang ingin disortir (contoh: DSC102312 atau cukup 102312), satu per baris atau dipisah koma.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nama Klien",
+              "fieldName": "namaKlien",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Klien",
+              "fieldType": "email",
+              "fieldName": "emailKlien",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Daftar Kode/Nomor Foto",
+              "fieldType": "textarea",
+              "fieldName": "kodeFoto",
+              "placeholder": "DSC102312\n102313\n312",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f1f7f519-cb3f-4439-bdd3-905a9d0240d8",
+      "name": "Form Order Sortir Foto",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "261e96c2-377c-4f8c-ace7-7ebdea34ec25"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "yqyMkZiKGGGoqeSh",
+          "cachedResultName": "sortir_foto_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "namaKlien": "={{ $json.namaKlien }}",
+            "emailKlien": "={{ $json.emailKlien }}",
+            "rawInput": "={{ $json.kodeFoto }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "namaKlien",
+              "displayName": "namaKlien",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "emailKlien",
+              "displayName": "emailKlien",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rawInput",
+              "displayName": "rawInput",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "00523960-9400-4ea3-b0d4-fe819ba7746d",
+      "name": "Simpan Log Order",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $('Form Order Sortir Foto').first().json.kodeFoto || '';\nconst lines = raw.split(/[\\n,]+/).map(s => s.trim()).filter(s => s.length > 0);\nconst results = lines.map(line => {\n  const match = line.match(/(\\d+)$/);\n  return { raw: line, code: match ? match[1] : null };\n});\nreturn results.map(r => ({ json: r }));"
+      },
+      "id": "22b039c2-8905-4c66-9680-86c181d9f31e",
+      "name": "Parse & Normalisasi Kode",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "ISI_FOLDER_ID_SOURCE_DI_SINI"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "id": "70aa8c1a-64dc-4ffc-ac93-8fac5348c5f8",
+      "name": "Cari File di Folder Source",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1152,
+        304
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const requested = $('Parse & Normalisasi Kode').all().map(i => i.json);\nconst files = $input.all().map(i => i.json);\n\nconst results = requested.map(r => {\n  if (!r.code) {\n    return { raw: r.raw, status: 'invalid' };\n  }\n  const matches = files.filter(f => {\n    const name = (f.name || '').replace(/\\.[^/.]+$/, '');\n    return name.endsWith(r.code);\n  });\n  if (matches.length === 1) {\n    return { raw: r.raw, code: r.code, status: 'found', fileId: matches[0].id, fileName: matches[0].name };\n  }\n  if (matches.length > 1) {\n    return { raw: r.raw, code: r.code, status: 'ambiguous', matchCount: matches.length, candidates: matches.map(m => m.name).join(', ') };\n  }\n  return { raw: r.raw, code: r.code, status: 'not_found' };\n});\n\nreturn results.map(r => ({ json: r }));"
+      },
+      "id": "d0db42f8-1cda-4d9f-bbcd-86b87eac7d91",
+      "name": "Cocokkan Kode dengan File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "found",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "92609bff-a4ec-44be-914f-7ad22cde7a97"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7051c1d0-7d60-4b4b-9c94-2b4e0f9f66fe",
+      "name": "Hanya yang Ditemukan",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $('Cocokkan Kode dengan File').all().map(i => i.json);\nconst found = all.filter(r => r.status === 'found');\nconst ambiguous = all.filter(r => r.status === 'ambiguous');\nconst notFound = all.filter(r => r.status === 'not_found' || r.status === 'invalid');\n\nlet html = '<p>Total diminta: ' + all.length + '</p>';\nhtml += '<p>Berhasil disortir & dicopy: ' + found.length + '</p>';\nif (ambiguous.length) {\n  html += '<p><b>Perlu dicek manual (kode ambigu):</b><br>' + ambiguous.map(a => a.raw + ' - ' + a.matchCount + ' kandidat (' + a.candidates + ')').join('<br>') + '</p>';\n}\nif (notFound.length) {\n  html += '<p><b>Tidak ditemukan:</b><br>' + notFound.map(n => n.raw).join('<br>') + '</p>';\n}\n\nreturn [{ json: { summaryHtml: html } }];"
+      },
+      "id": "bdc15159-6875-400f-b9a4-336b530183e2",
+      "name": "Susun Ringkasan Hasil",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "bintangazhar444@gmail.com",
+        "subject": "=Hasil Sortir Foto - {{ $('Form Order Sortir Foto').first().json.namaKlien }}",
+        "message": "={{ $json.summaryHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0e1af54e-a3bb-4244-8545-e9f2eeae1af1",
+      "name": "Kirim Ringkasan ke Admin",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        400
+      ],
+      "webhookId": "91caf902-2e86-47f4-a709-4d5cd7e26752",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.fileId }}"
+        },
+        "name": "={{ $json.fileName }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ISI_FOLDER_ID_TUJUAN_CETAK_DI_SINI"
+        },
+        "options": {}
+      },
+      "id": "5e13e41b-b1e1-40f2-8d0e-d3104b094858",
+      "name": "Copy File ke Folder Cetak",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2464,
+        0
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fqaj1KELJO7yspxN",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5274c7c2-b199-42b2-a815-62b619aa4d90",
+      "name": "Loop Copy File",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Form Order Sortir Foto": {
+      "main": [
+        [
+          {
+            "node": "Simpan Log Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simpan Log Order": {
+      "main": [
+        [
+          {
+            "node": "Parse & Normalisasi Kode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Normalisasi Kode": {
+      "main": [
+        [
+          {
+            "node": "Cari File di Folder Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cari File di Folder Source": {
+      "main": [
+        [
+          {
+            "node": "Cocokkan Kode dengan File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cocokkan Kode dengan File": {
+      "main": [
+        [
+          {
+            "node": "Hanya yang Ditemukan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hanya yang Ditemukan": {
+      "main": [
+        [
+          {
+            "node": "Loop Copy File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Susun Ringkasan Hasil": {
+      "main": [
+        [
+          {
+            "node": "Kirim Ringkasan ke Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy File ke Folder Cetak": {
+      "main": [
+        [
+          {
+            "node": "Loop Copy File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Copy File": {
+      "main": [
+        [
+          {
+            "node": "Susun Ringkasan Hasil",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Copy File ke Folder Cetak",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {
+    "Form Order Sortir Foto": [
+      {
+        "json": {
+          "namaKlien": "Tegar",
+          "emailKlien": "bintang@bintang.me",
+          "kodeFoto": "10231, 1023123, 123, 124, 125",
+          "submittedAt": "2026-09-14T18:17:24.351+07:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "6JFvKhXGRptCniR1",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-14T11:10:04.524Z",
+      "updatedAt": "2026-09-14T11:10:04.524Z"
+    }
+  ],
+  "activeVersion": null
+}
