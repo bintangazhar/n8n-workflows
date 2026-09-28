@@ -1,0 +1,358 @@
+{
+  "id": "ISCwaCOSLiPEWKE0",
+  "name": "SW - Voice Transcribe",
+  "description": null,
+  "active": true,
+  "activeVersionId": "9986f94a-e37a-422e-a1ad-1e1049a2221f",
+  "createdAt": "2026-09-09T15:29:16.413Z",
+  "updatedAt": "2026-09-09T18:31:00.923Z",
+  "isArchived": false,
+  "versionId": "9986f94a-e37a-422e-a1ad-1e1049a2221f",
+  "versionCounter": 10,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatId"
+            },
+            {
+              "name": "fileId"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1e4e8b24-5145-47ea-becb-1620973c7f63",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.fileId }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e089ad71-129c-4a0b-bf73-8dec4a0a9a65",
+      "name": "Get Voice File",
+      "webhookId": "8a243f2d-a257-4d1d-bfaa-8fae903230c0",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "71936a71-4273-43e1-894a-796e1742c686",
+      "name": "Transcribe Audio",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QVYkHlJCbUcVHNDj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "text",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "r2",
+              "name": "chatId",
+              "value": "={{ $('When Executed by Another Workflow').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        0
+      ],
+      "id": "d09c91f0-8d43-4d93-9442-fed82eb6081f",
+      "name": "Build Result"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Voice File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Build Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "jRjQXaIiK8J5j6ig",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "ISCwaCOSLiPEWKE0",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T15:29:16.413Z",
+      "updatedAt": "2026-09-09T15:29:16.413Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "9986f94a-e37a-422e-a1ad-1e1049a2221f",
+    "workflowId": "ISCwaCOSLiPEWKE0",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chatId"
+              },
+              {
+                "name": "fileId"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "1e4e8b24-5145-47ea-becb-1620973c7f63",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "fileId": "={{ $json.fileId }}",
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          0
+        ],
+        "id": "e089ad71-129c-4a0b-bf73-8dec4a0a9a65",
+        "name": "Get Voice File",
+        "webhookId": "8a243f2d-a257-4d1d-bfaa-8fae903230c0",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "audio",
+          "modelId": {
+            "__rl": true,
+            "value": "models/gemini-3.5-flash-lite",
+            "mode": "list",
+            "cachedResultName": "models/gemini-3.5-flash-lite"
+          },
+          "inputType": "binary",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.googleGemini",
+        "typeVersion": 1,
+        "position": [
+          448,
+          0
+        ],
+        "id": "71936a71-4273-43e1-894a-796e1742c686",
+        "name": "Transcribe Audio",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "QVYkHlJCbUcVHNDj",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1",
+                "name": "text",
+                "value": "={{ $json.content.parts[0].text }}",
+                "type": "string"
+              },
+              {
+                "id": "r2",
+                "name": "chatId",
+                "value": "={{ $('When Executed by Another Workflow').item.json.chatId }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          672,
+          0
+        ],
+        "id": "d09c91f0-8d43-4d93-9442-fed82eb6081f",
+        "name": "Build Result"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Get Voice File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Voice File": {
+        "main": [
+          [
+            {
+              "node": "Transcribe Audio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Transcribe Audio": {
+        "main": [
+          [
+            {
+              "node": "Build Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar",
+    "name": "Version 9986f94a",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-09-09T17:08:59.674Z",
+    "updatedAt": "2026-09-09T17:09:15.846Z",
+    "workflowPublishHistory": [
+      {
+        "id": 38,
+        "workflowId": "ISCwaCOSLiPEWKE0",
+        "versionId": "9986f94a-e37a-422e-a1ad-1e1049a2221f",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T17:09:15.844Z"
+      },
+      {
+        "id": 116,
+        "workflowId": "ISCwaCOSLiPEWKE0",
+        "versionId": "9986f94a-e37a-422e-a1ad-1e1049a2221f",
+        "event": "deactivated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T18:31:01.040Z"
+      },
+      {
+        "id": 117,
+        "workflowId": "ISCwaCOSLiPEWKE0",
+        "versionId": "9986f94a-e37a-422e-a1ad-1e1049a2221f",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T18:31:01.058Z"
+      }
+    ]
+  }
+}
