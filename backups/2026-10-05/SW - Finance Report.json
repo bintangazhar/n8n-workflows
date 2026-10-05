@@ -1,0 +1,520 @@
+{
+  "id": "BPFPN0YoLfAdNWau",
+  "name": "SW - Finance Report",
+  "description": null,
+  "active": true,
+  "activeVersionId": "c1975c13-55a6-45a5-be0e-590b83efcbc9",
+  "createdAt": "2026-09-09T15:30:20.092Z",
+  "updatedAt": "2026-09-11T22:30:16.826Z",
+  "isArchived": false,
+  "versionId": "c1975c13-55a6-45a5-be0e-590b83efcbc9",
+  "versionCounter": 46,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatId"
+            },
+            {
+              "name": "userText"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d85f36a1-95d6-4a75-87c5-52f7d5381bb3",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userText }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=Financial report assistant. Today: {{ $today.format('dd MMMM yyyy') }} ({{ $now.format('yyyy-MM-dd') }}).\n\n1. Call catatan_keuangan for raw data (A=Toko, B=Total, C=Items, D=Tanggal Struk, E=Sumber, F=Tanggal Input, G=Waktu Input).\n2. Parse the requested period (Indonesian): hari ini, kemarin, minggu/bulan/tahun ini-lalu, specific month/year (e.g. \"Agustus 2025\", \"2024\"), or explicit date range. Infer year if omitted. Default to \"bulan ini\" only if no time signal exists at all.\n3. Filter by Tanggal Struk (fallback Tanggal Input). Sum Total as numbers; verify by re-adding before output.\n4. No matches → short friendly \"no data\" reply, no fabrication, no silent period swap.\n5. Reply in EXACTLY this Markdown (Telegram-safe, no HTML), [Periode] matching what was requested:\n\n📊 *Laporan Pengeluaran [Periode]*\n📅 [Rentang Tanggal]\n\n💰 *Total Pengeluaran:* Rp [Total]\n🛒 *Jumlah Transaksi:* [Count] kali\n\n📋 *Detail Transaksi:*\n--\n📅 *[dd-mmm-yy]*\n📝 *[Toko]:* [Items]\n💵 *Pengeluaran:* Rp [Amount, dot-separated]\n--\n(repeat; if many, summarize oldest into one line. Total reply under 200 words)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "4e34b22b-bd19-4f75-b48c-c8233c4766b8",
+      "name": "Report Agent"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU",
+          "mode": "list",
+          "cachedResultName": "Catatan Belanja",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Pengeluaran",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        224
+      ],
+      "id": "a17755dd-9c97-4063-b377-cc34179f666e",
+      "name": "catatan_keuangan",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "message",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        0
+      ],
+      "id": "991dc3e8-36ad-4202-ba6e-c13dccd80411",
+      "name": "Build Result"
+    },
+    {
+      "parameters": {
+        "model": "qwen3:4b",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        160
+      ],
+      "id": "96a67cc2-141d-456e-9e79-88e8145ff09f",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "VqdwS233OHtpZtnu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        240
+      ],
+      "id": "6cd65287-0e5c-4768-bef6-12e046c7a74e",
+      "name": "Gemini Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QVYkHlJCbUcVHNDj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        80,
+        192
+      ],
+      "id": "bb335282-6617-4b67-a465-6cce2fd71bc3",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "x8Y8moQ8hdkRDNGG",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Report Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report Agent": {
+      "main": [
+        [
+          {
+            "node": "Build Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "catatan_keuangan": {
+      "ai_tool": [
+        [
+          {
+            "node": "Report Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Gemini Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Report Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Report Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "jRjQXaIiK8J5j6ig",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "BPFPN0YoLfAdNWau",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T15:30:20.092Z",
+      "updatedAt": "2026-09-09T15:30:20.092Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "c1975c13-55a6-45a5-be0e-590b83efcbc9",
+    "workflowId": "BPFPN0YoLfAdNWau",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chatId"
+              },
+              {
+                "name": "userText"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "d85f36a1-95d6-4a75-87c5-52f7d5381bb3",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.userText }}",
+          "needsFallback": true,
+          "options": {
+            "systemMessage": "=Financial report assistant. Today: {{ $today.format('dd MMMM yyyy') }} ({{ $now.format('yyyy-MM-dd') }}).\n\n1. Call catatan_keuangan for raw data (A=Toko, B=Total, C=Items, D=Tanggal Struk, E=Sumber, F=Tanggal Input, G=Waktu Input).\n2. Parse the requested period (Indonesian): hari ini, kemarin, minggu/bulan/tahun ini-lalu, specific month/year (e.g. \"Agustus 2025\", \"2024\"), or explicit date range. Infer year if omitted. Default to \"bulan ini\" only if no time signal exists at all.\n3. Filter by Tanggal Struk (fallback Tanggal Input). Sum Total as numbers; verify by re-adding before output.\n4. No matches → short friendly \"no data\" reply, no fabrication, no silent period swap.\n5. Reply in EXACTLY this Markdown (Telegram-safe, no HTML), [Periode] matching what was requested:\n\n📊 *Laporan Pengeluaran [Periode]*\n📅 [Rentang Tanggal]\n\n💰 *Total Pengeluaran:* Rp [Total]\n🛒 *Jumlah Transaksi:* [Count] kali\n\n📋 *Detail Transaksi:*\n--\n📅 *[dd-mmm-yy]*\n📝 *[Toko]:* [Items]\n💵 *Pengeluaran:* Rp [Amount, dot-separated]\n--\n(repeat; if many, summarize oldest into one line. Total reply under 200 words)"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2.2,
+        "position": [
+          224,
+          0
+        ],
+        "id": "4e34b22b-bd19-4f75-b48c-c8233c4766b8",
+        "name": "Report Agent"
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU",
+            "mode": "list",
+            "cachedResultName": "Catatan Belanja",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Pengeluaran",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19GQUEjIUEGwEqPL1TRncZUcqmJEKvtIBTJeLSUrGvUU/edit#gid=0"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheetsTool",
+        "typeVersion": 4.7,
+        "position": [
+          416,
+          224
+        ],
+        "id": "a17755dd-9c97-4063-b377-cc34179f666e",
+        "name": "catatan_keuangan",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "7k6H6iPtMGHICq5n",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1",
+                "name": "message",
+                "value": "={{ $json.output }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          576,
+          0
+        ],
+        "id": "991dc3e8-36ad-4202-ba6e-c13dccd80411",
+        "name": "Build Result"
+      },
+      {
+        "parameters": {
+          "model": "qwen3:4b",
+          "options": {
+            "temperature": 0.3
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          -288,
+          160
+        ],
+        "id": "96a67cc2-141d-456e-9e79-88e8145ff09f",
+        "name": "Ollama Chat Model",
+        "credentials": {
+          "ollamaApi": {
+            "id": "VqdwS233OHtpZtnu",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-3.1-flash-lite",
+          "options": {
+            "temperature": 0.3
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          256,
+          240
+        ],
+        "id": "6cd65287-0e5c-4768-bef6-12e046c7a74e",
+        "name": "Gemini Model",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "QVYkHlJCbUcVHNDj",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "openai/gpt-oss-20b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+        "typeVersion": 1,
+        "position": [
+          80,
+          192
+        ],
+        "id": "bb335282-6617-4b67-a465-6cce2fd71bc3",
+        "name": "Groq Chat Model",
+        "credentials": {
+          "groqApi": {
+            "id": "x8Y8moQ8hdkRDNGG",
+            "name": "Groq account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Report Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Report Agent": {
+        "main": [
+          [
+            {
+              "node": "Build Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "catatan_keuangan": {
+        "ai_tool": [
+          [
+            {
+              "node": "Report Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Chat Model": {
+        "ai_languageModel": [
+          []
+        ]
+      },
+      "Gemini Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Report Agent",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Groq Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Report Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Compact system prompt (save ~48 tokens)",
+    "description": "Tightened step wording, kept the output template byte-for-byte identical since that's the literal format contract. No functional change. Estimated ~321 to ~273 tokens for the system message alone.",
+    "autosaved": false,
+    "createdAt": "2026-09-11T22:30:16.828Z",
+    "updatedAt": "2026-09-11T22:30:16.828Z",
+    "workflowPublishHistory": [
+      {
+        "id": 181,
+        "workflowId": "BPFPN0YoLfAdNWau",
+        "versionId": "c1975c13-55a6-45a5-be0e-590b83efcbc9",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T22:30:22.603Z"
+      }
+    ]
+  }
+}
