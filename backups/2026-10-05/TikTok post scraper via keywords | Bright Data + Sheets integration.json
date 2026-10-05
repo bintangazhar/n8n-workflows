@@ -1,0 +1,1159 @@
+{
+  "id": "bB3wW9g2WVJZvpJc",
+  "name": "TikTok post scraper via keywords | Bright Data + Sheets integration",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-21T08:12:02.285Z",
+  "updatedAt": "2026-09-30T18:06:49.409Z",
+  "isArchived": false,
+  "versionId": "e6d6dac6-126e-4560-adbd-4b1ab60d8b12",
+  "versionCounter": 49,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://api.brightdata.com/datasets/v3/snapshot/{{ $json.snapshot_id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "format",
+              "value": "json"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ba515dd2-0150-492c-8ca0-83ba6c92ceb1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d2a4bef-7b12-4d2c-bb0e-d06b599b82b4",
+      "name": "Decode Snapshot from Response1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2560,
+        944
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "5568e3e0-fe0a-483b-89a2-c1922638a4fc",
+      "name": "Wait 1 minute1",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1920,
+        960
+      ],
+      "webhookId": "10b45556-5e91-4387-abd0-f9078b220286",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "formTitle": "TikTok ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Keyword"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6393981d-85ae-4a47-8d05-e427f4443ef3",
+      "name": "Accepts keyword input from the user.1",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        896,
+        944
+      ],
+      "webhookId": "d6b1e0e3-e8bb-4662-a9e2-529fb619bcf6",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brightdata.com/datasets/v3/trigger",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "dataset_id",
+              "value": "gd_lu702nij2f790tmv9h"
+            },
+            {
+              "name": "include_errors",
+              "value": "true"
+            },
+            {
+              "name": "type",
+              "value": "discover_new"
+            },
+            {
+              "name": "discover_by",
+              "value": "keyword"
+            },
+            {
+              "name": "limit_per_input",
+              "value": "2"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ba515dd2-0150-492c-8ca0-83ba6c92ceb1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=[\n  {\n    \"search_keyword\": \"{{ $json.Keyword }}\",\n    \"country\": \"\"\n  }\n]",
+        "options": {}
+      },
+      "id": "f5fb4e76-a0f5-4700-8416-2dcb46969dc4",
+      "name": "Sends keyword to Bright Data's Discover API to start scraping.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1200,
+        960
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://api.brightdata.com/datasets/v3/progress/{{ $json.snapshot_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ba515dd2-0150-492c-8ca0-83ba6c92ceb1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b67d12fb-2a7a-44d7-8cbe-503fb18f59ed",
+      "name": "Checks the scraping status using snapshot ID.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1584,
+        960
+      ],
+      "typeVersion": 4.2,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "🟥 1. Form Trigger Node\n📌 Purpose:\n\nUser submits a keyword input.\n\nThis starts the scraping process.\n\n",
+        "height": 340,
+        "width": 280,
+        "color": 3
+      },
+      "id": "c2093990-46cf-484a-bc0f-b80f81fb4479",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟩 2. HTTP Request (Trigger Scraping on Bright Data)\n🔗 POST to Bright Data\n\nSends the keyword to Bright Data.\n\nTriggers scraping using dataset ID.\n\nTikTok keyword-based discovery initiated.\n\n",
+        "height": 420,
+        "width": 340,
+        "color": 4
+      },
+      "id": "4a876ba2-ff95-44d4-8cf8-5317a6dd8617",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1104,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟦 3. Snapshot Progress Check\n🔍 GET - snapshot status\n\nFetches the current snapshot_id.\n\nChecks if the scraping task is finished (status == ready).",
+        "height": 360,
+        "width": 320,
+        "color": 5
+      },
+      "id": "5444b52f-af83-46e3-94fe-e3e13f797a79",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1488,
+        800
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟪 4. IF Node (Check Completion)\n📌 Condition:\n\nIf snapshot is ready → move forward.\n\nElse → wait and retry.",
+        "height": 360,
+        "width": 260,
+        "color": 2
+      },
+      "id": "9c6b8318-c25c-45e2-80d0-6d55abef0b3d",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2144,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "35ed620d-b5d5-4e97-bcc5-52b283d85616",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "77738a96-8181-4ff5-962a-67965272f011",
+      "name": "Check Final Status1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2224,
+        960
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "🟥 5. Wait Node\n🕒 Delays by 1 minute\n\nIf snapshot is not ready, pause for 1 minute.\n\nThen return to recheck loop.",
+        "height": 380,
+        "width": 280,
+        "color": 6
+      },
+      "id": "e0fa74d3-d41c-4afc-a7ab-474be354b85d",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1824,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟨 6. Final Data Storage\n📌 Google Sheets Integration:\n\nStores extracted TikTok data.\n\nIncludes all post metrics and profile info.\n\n",
+        "height": 380,
+        "width": 300,
+        "color": 3
+      },
+      "id": "165e8ab5-4075-48d3-adc7-155a43df7142",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2832,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1PQOoA8ra9jwswkxNz0xG5hvTV94kwtNIMTiVWnG2kNo",
+          "mode": "list",
+          "cachedResultName": "Media Monitoring - Sentiment Analysis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PQOoA8ra9jwswkxNz0xG5hvTV94kwtNIMTiVWnG2kNo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Tiktok by keyword",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PQOoA8ra9jwswkxNz0xG5hvTV94kwtNIMTiVWnG2kNo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json.url }}",
+            "ratio": "={{ $json.ratio }}",
+            "width": "={{ $json.width }}",
+            "post_id": "={{ $json.post_id }}",
+            "secu_id": "={{ $json.secu_id }}",
+            "hashtags": "={{ $json.hashtags }}",
+            "post_type": "={{ $json.post_type }}",
+            "shortcode": "={{ $json.shortcode }}",
+            "digg_count": "={{ $json.digg_count }}",
+            "play_count": "={{ $json.play_count }}",
+            "profile_id": "={{ $json.profile_id }}",
+            "create_time": "={{ $json.create_time }}",
+            "description": "={{ $json.description }}",
+            "profile_url": "={{ $json.profile_url }}",
+            "share_count": "={{ $json.share_count }}",
+            "offical_item": "={{ $json.offical_item }}",
+            "collect_count": "={{ $json.collect_count }}",
+            "comment_count": "={{ $json.comment_count }}",
+            "original_item": "={{ $json.original_item }}",
+            "preview_image": "={{ $json.preview_image }}",
+            "original_sound": "={{ $json.original_sound }}",
+            "profile_avatar": "={{ $json.profile_avatar }}",
+            "video_duration": "={{ $json.video_duration }}",
+            "discovery_input": "={{ $json.discovery_input }}",
+            "profile_username": "={{ $json.profile_username }}",
+            "profile_biography": "={{ $json.profile_biography }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "create_time",
+              "displayName": "create_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "digg_count",
+              "displayName": "digg_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "share_count",
+              "displayName": "share_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "collect_count",
+              "displayName": "collect_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_duration",
+              "displayName": "video_duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_sound",
+              "displayName": "original_sound",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_id",
+              "displayName": "profile_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_username",
+              "displayName": "profile_username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_url",
+              "displayName": "profile_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_avatar",
+              "displayName": "profile_avatar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_biography",
+              "displayName": "profile_biography",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preview_image",
+              "displayName": "preview_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "post_type",
+              "displayName": "post_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_input",
+              "displayName": "discovery_input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "offical_item",
+              "displayName": "offical_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "secu_id",
+              "displayName": "secu_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_item",
+              "displayName": "original_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "width",
+              "displayName": "width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ratio",
+              "displayName": "ratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0735562f-e3d5-4327-83f3-3f7f434d34ef",
+      "name": "Google Sheets1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2928,
+        944
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Decode Snapshot from Response1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 minute1": {
+      "main": [
+        [
+          {
+            "node": "Check Final Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepts keyword input from the user.1": {
+      "main": [
+        [
+          {
+            "node": "Sends keyword to Bright Data's Discover API to start scraping.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sends keyword to Bright Data's Discover API to start scraping.1": {
+      "main": [
+        [
+          {
+            "node": "Checks the scraping status using snapshot ID.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checks the scraping status using snapshot ID.1": {
+      "main": [
+        [
+          {
+            "node": "Wait 1 minute1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Final Status1": {
+      "main": [
+        [
+          {
+            "node": "Decode Snapshot from Response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Checks the scraping status using snapshot ID.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {
+    "Accepts keyword input from the user.1": [
+      {
+        "json": {
+          "Keyword": "ria norsan",
+          "submittedAt": "2026-09-30T22:47:46.288+07:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Checks the scraping status using snapshot ID.1": [
+      {
+        "json": {
+          "status": "ready",
+          "snapshot_id": "sd_muocg4tc14fcx26m7o",
+          "dataset_id": "gd_lu702nij2f790tmv9h",
+          "records": 2,
+          "errors": 0,
+          "collection_duration": 223755,
+          "avg_duration_per_input": 223755
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Sends keyword to Bright Data's Discover API to start scraping.1": [
+      {
+        "json": {
+          "snapshot_id": "sd_muocg4tc14fcx26m7o"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Decode Snapshot from Response1": [
+      {
+        "json": {
+          "url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748",
+          "post_id": "7678594119521897748",
+          "description": "Gubernur Kalimantan Barat, Ria Norsan menerima langsung massa aksi di Kantor DPRD Provinsi Kalimantan Barat.  Ria Norsan menyampaikan bahwa Pemerintah bersama DPRD Kalbar sepakat untuk mempertahankan Perda nomor 1 tahun 22 tentang Pembukaan Lahan Perladangan Berbasis Kearifan Lokal. #RiaNorsan #GubernurKalbar #PemprovKalbar #DPRDKalbar #KalimantanBarat",
+          "create_time": "2026-08-27T06:27:01.000Z",
+          "digg_count": 2411,
+          "share_count": "167",
+          "collect_count": 131,
+          "comment_count": 163,
+          "play_count": 95500,
+          "video_duration": 17,
+          "hashtags": [
+            "rianorsan",
+            "gubernurkalbar",
+            "pemprovkalbar",
+            "dprdkalbar",
+            "kalimantanbarat"
+          ],
+          "original_sound": "HAL KALBAR: suara asli - HAL KALBAR",
+          "profile_id": "7599750691557786625",
+          "profile_username": "HAL KALBAR",
+          "profile_url": "https://www.tiktok.com/@hal.kalbar",
+          "profile_avatar": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/92bfed45cbd2850e2b92c794347f5a1b~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=e593a124&x-expires=1790956800&x-signature=INTBWH1%2BVAnUroOwERwxDTIpBlU%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+          "profile_biography": "Ape Hal Hari Ini?",
+          "preview_image": "https://p19-common-sign.tiktokcdn.com/tos-alisg-p-0037/oIIDqjAuqez9EC4sOOiBLHAAECULP6AECgfFR2~tplv-tiktokx-origin.image?dr=14575&x-expires=1790956800&x-signature=3hHNaXFlzqADxn1OVYltJCyRdd0%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my",
+          "post_type": "video",
+          "discovery_input": {
+            "search_keyword": "ria norsan",
+            "country": ""
+          },
+          "offical_item": false,
+          "secu_id": "MS4wLjABAAAADvQprocwHjUfbpYmLzpNatMpxg73Ncr7wmuq7yNh4nrvagpSMS7ARIEvcOL5qQZZ",
+          "original_item": false,
+          "shortcode": "7678594119521897748",
+          "width": 576,
+          "ratio": "540p",
+          "video_url": "https://v16-webapp-prime.tiktok.com/video/tos/alisg/tos-alisg-pve-0037c001/oA4PJCxi8LRwQEcIEBiqA2WBgtUgCB1MfejEVz/?a=1988&bti=ODszNWYuMDE6&&bt=1354&ft=-Csk_mK9PD12N-4eyn-Uxut2SY6e3wv25VcAp&mime_type=video_mp4&rc=PDtmOzVnNDo7Z2ZmOzM2NEBpanI0NW05cjd3ZDMzODczNEA0L2AuNDNfNmAxMy0tMzE2YSNqX3IuMmRzZTRhLS1kMTFzcw%3D%3D&expire=1790960042&l=202610010053449AF7B05EA6D67C217C41&ply_type=2&policy=2&signature=0aca507c466e58ba1340cd5dd596ebd7&tk=tt_chain_token&btag=e000b8000",
+          "music": {
+            "authorname": "HAL KALBAR",
+            "covermedium": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/92bfed45cbd2850e2b92c794347f5a1b~tplv-tiktokx-cropcenter:720:720.jpeg?dr=14579&refresh_token=e7eae47e&x-expires=1790956800&x-signature=BXNwJA8jNrlQQWEWw14HNRbYT6E%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my",
+            "id": "7678594167005514514",
+            "original": true,
+            "playurl": "https://v16m.tiktokcdn.com/357b00e33546e2b57bf5709dd6d9138f/6abe902a/video/tos/alisg/tos-alisg-v-27dcd7/oABkJAB2jCefxAa5P9mMQdbiAL0iEUqDBEgCLn/?a=1233&bti=ODszNWYuMDE6&&bt=125&ft=GcDrcInz7ThXl54GXq8Zmo&mime_type=audio_mpeg&rc=ajo3bW45cmd3ZDMzODU8NEBpajo3bW45cmd3ZDMzODU8NEAyNDRyMmRzZTRhLS1kMS1zYSMyNDRyMmRzZTRhLS1kMS1zcw%3D%3D&vvpl=1&l=202610010053449AF7B05EA6D67C217C41&btag=e00078000&sp_exp=hash_v0",
+            "title": "suara asli - HAL KALBAR"
+          },
+          "cdn_url": "https://www.tiktok.com/0672dddc-eb72-4170-ad38-3cf0181a564a",
+          "is_verified": false,
+          "account_id": "hal.kalbar",
+          "carousel_images": null,
+          "tagged_user": null,
+          "profile_followers": 2094,
+          "tt_chain_token": "eaoVh4ksxy4hWarJ+293Ow==",
+          "region": "ID",
+          "commerce_info": null,
+          "subtitle_url": "https://v16-webapp.tiktok.com/cb7f64f4c080ca2abdf8069c95820ed7/6abfe1aa/video/tos/alisg/tos-alisg-pv-0037/d94818a36c93488ca98939e4575bab19/?a=1988&bti=ODszNWYuMDE6&&bt=4180&ft=-ElcomK9PD12N-4eyn-Uxut2SY6e3wv25VcAp&mime_type=video_mp4&rc=anI0NW05cjd3ZDMzODczNEBpanI0NW05cjd3ZDMzODczNEBqX3IuMmRzZTRhLS1kMTFzYSNqX3IuMmRzZTRhLS1kMTFzcw%3D%3D&l=202610010053449AF7B05EA6D67C217C41&btag=e00078000",
+          "subtitle_format": "webvtt",
+          "subtitle_info": [
+            {
+              "url_expire": "1790960042",
+              "size": 368,
+              "language_id": "2",
+              "language_code_name": "eng-US",
+              "url": "https://v16-webapp.tiktok.com/cb7f64f4c080ca2abdf8069c95820ed7/6abfe1aa/video/tos/alisg/tos-alisg-pv-0037/d94818a36c93488ca98939e4575bab19/?a=1988&bti=ODszNWYuMDE6&&bt=4180&ft=-ElcomK9PD12N-4eyn-Uxut2SY6e3wv25VcAp&mime_type=video_mp4&rc=anI0NW05cjd3ZDMzODczNEBpanI0NW05cjd3ZDMzODczNEBqX3IuMmRzZTRhLS1kMTFzYSNqX3IuMmRzZTRhLS1kMTFzcw%3D%3D&l=202610010053449AF7B05EA6D67C217C41&btag=e00078000",
+              "format": "webvtt",
+              "version": "4"
+            },
+            {
+              "url_expire": "1790960042",
+              "size": 368,
+              "language_id": "23",
+              "language_code_name": "ind-ID",
+              "url": "https://v16-webapp.tiktok.com/4aba997da9aa823306cdb108074334c8/6abfe1aa/video/tos/alisg/tos-alisg-pv-0037/5ea6424fca974fbca14893419b9a53b0/?a=1988&bti=ODszNWYuMDE6&&bt=4180&ft=-ElcomK9PD12N-4eyn-Uxut2SY6e3wv25VcAp&mime_type=video_mp4&rc=anI0NW05cjd3ZDMzODczNEBpanI0NW05cjd3ZDMzODczNEBqX3IuMmRzZTRhLS1kMTFzYSNqX3IuMmRzZTRhLS1kMTFzcw%3D%3D&l=202610010053449AF7B05EA6D67C217C41&btag=e00078000",
+              "format": "webvtt",
+              "version": "1:whisper_lid"
+            }
+          ],
+          "cdn_link": "https://v16-webapp-prime.tiktok.com/video/tos/alisg/tos-alisg-pve-0037c001/oIIEPiqCeBF4BwBWEfj1qUQgix2LtjzJVSxARU/?a=1988&bti=ODszNWYuMDE6&&bt=2605&eid=20480&ft=-Csk_mK9PD12N-4eyn-Uxut2SY6e3wv25VcAp&mime_type=video_mp4&rc=Zzc5ZzRpOjw5aDRkZTg0NEBpanI0NW05cjd3ZDMzODczNEBeYTJhYC0vNl4xXzM1NGMyYSNqX3IuMmRzZTRhLS1kMTFzcw%3D%3D&expire=1790960042&l=202610010053449AF7B05EA6D67C217C41&ply_type=2&policy=2&signature=a7c3f92d84b69813140637e5dac09540&tk=tt_chain_token&btag=e000b8000",
+          "num_share_count": 167,
+          "comments": [
+            {
+              "comment": "UDAH TAU BANYAK MUDARATNYA\nKEPADA BANYAKNYA MANUSIA.. MALAH DI PERTAHANKAN 🤦🤦🤦🤦",
+              "user_handle": "dharofficia",
+              "date": "2026-08-27T14:06:58.000Z",
+              "likes": 18,
+              "num_of_replies": 9,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678712651774427912",
+              "comment_id": "7678712651774427912",
+              "user_id": "6556043924296613890"
+            },
+            {
+              "comment": "jujur, saya Pengen tau. kenapa tiap tahun buka ladang harus di bakar lahannya? bukannya sawah atw ladang yg di gunakan untuk nanam pagi setiap tahunnya ya? kenapa harus di bakar lagi?",
+              "user_handle": "PujidaZahir",
+              "date": "2026-08-27T14:34:02.000Z",
+              "likes": 2,
+              "num_of_replies": 36,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678719643674297096",
+              "comment_id": "7678719643674297096",
+              "user_id": "7388758268426830853"
+            },
+            {
+              "comment": "die jadi gubunur mn Ade bagusnye ape yg bise di liat hasilnya sejak jadi gubenur",
+              "user_handle": "Atika ponti",
+              "date": "2026-08-27T11:36:20.000Z",
+              "likes": 5,
+              "num_of_replies": 3,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678673805275857682",
+              "comment_id": "7678673805275857682",
+              "user_id": "6924800199106872325"
+            },
+            {
+              "comment": "mne die berani ngapus nye 😆\nasal ngapus nye positif kena turunkan dari jabatan beliau nih 😆😆😆",
+              "user_handle": "R1DAI",
+              "date": "2026-08-27T09:03:30.000Z",
+              "likes": 54,
+              "num_of_replies": 7,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678634448267461394",
+              "comment_id": "7678634448267461394",
+              "user_id": "6753390425607209985"
+            },
+            {
+              "comment": "secara logika kami tidak sanggup kasi masyarakat makan ( kata norsan )",
+              "user_handle": "Oni_r0zex",
+              "date": "2026-08-27T12:21:31.000Z",
+              "likes": 15,
+              "num_of_replies": 2,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678685449644966676",
+              "comment_id": "7678685449644966676",
+              "user_id": "6550264608644235266"
+            },
+            {
+              "comment": "Mau pertahankan bisa tanggung jawab atau awasin lah. Jadi kmi ni musti hirup asap tiap tahun kah? Dikira ndk tiap tahun ada musim abu+asap.",
+              "user_handle": "Rn_XXVII",
+              "date": "2026-08-27T10:57:12.000Z",
+              "likes": 7,
+              "num_of_replies": 13,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678663724413403912",
+              "comment_id": "7678663724413403912",
+              "user_id": "6815985322711745538"
+            },
+            {
+              "comment": "nah gitu dong, pro rakyat",
+              "user_handle": "meli",
+              "date": "2026-08-27T11:08:48.000Z",
+              "likes": 6,
+              "num_of_replies": 6,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678666751025988359",
+              "comment_id": "7678666751025988359",
+              "user_id": "89941310603"
+            },
+            {
+              "comment": "pak gun kapan habisnya kabut asap di Pontianak niii",
+              "user_handle": "Andylaros",
+              "date": "2026-08-27T10:32:10.000Z",
+              "likes": 3,
+              "num_of_replies": 2,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678657310540989191",
+              "comment_id": "7678657310540989191",
+              "user_id": "6799344019291014146"
+            },
+            {
+              "comment": "hampir saja🤣🤣🤣",
+              "user_handle": "Klaudius81",
+              "date": "2026-08-27T10:48:21.000Z",
+              "likes": 0,
+              "num_of_replies": 2,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678660818574017300",
+              "comment_id": "7678660818574017300",
+              "user_id": "6593174421962850306"
+            },
+            {
+              "comment": "CALON PRESIDEN BORNEO",
+              "user_handle": "Aang",
+              "date": "2026-08-27T10:31:22.000Z",
+              "likes": 1,
+              "num_of_replies": 1,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678656301484475143",
+              "comment_id": "7678656301484475143",
+              "user_id": "7165799221680735259"
+            },
+            {
+              "comment": "ganti rugi juga pak asap dimana-mana, debu pembakaran masuk rumah.",
+              "user_handle": "I am.",
+              "date": "2026-08-28T04:08:57.000Z",
+              "likes": 2,
+              "num_of_replies": 1,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678929611631215380",
+              "comment_id": "7678929611631215380",
+              "user_id": "7264824528056206342"
+            },
+            {
+              "comment": "bagus bapak yg gini kami mau mudahan tahun kedepan nya bapak jadi gebenur kami lagi 👍👍",
+              "user_handle": "Elias Kaeng",
+              "date": "2026-08-27T13:47:20.000Z",
+              "likes": 1,
+              "num_of_replies": 2,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678707568664281864",
+              "comment_id": "7678707568664281864",
+              "user_id": "7447306188482020353"
+            },
+            {
+              "comment": "Sebenar pencabutan PERDA BOLEH Asal ada solusinya, bagi petani,....",
+              "user_handle": "BASRI SP",
+              "date": "2026-08-28T16:49:52.000Z",
+              "likes": 0,
+              "num_of_replies": 1,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7679124862888313607",
+              "comment_id": "7679124862888313607",
+              "user_id": "7280765833986638853"
+            },
+            {
+              "comment": "horeee...makasih pak...",
+              "user_handle": "Nurdiana",
+              "date": "2026-09-02T06:21:35.000Z",
+              "likes": 0,
+              "num_of_replies": 1,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7680818331259978514",
+              "comment_id": "7680818331259978514",
+              "user_id": "7395209252849566726"
+            },
+            {
+              "comment": "saya baru tahu d kalbar ad gubernur",
+              "user_handle": "paolo Khong",
+              "date": "2026-08-28T06:19:34.000Z",
+              "likes": 0,
+              "num_of_replies": 0,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678963260796732167",
+              "comment_id": "7678963260796732167",
+              "user_id": "7333962653893575686"
+            },
+            {
+              "comment": "Kalian masih percaya dengan die?",
+              "user_handle": "Mark",
+              "date": "2026-08-27T12:37:53.000Z",
+              "likes": 0,
+              "num_of_replies": 1,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678689640099382036",
+              "comment_id": "7678689640099382036",
+              "user_id": "7418838317742392325"
+            },
+            {
+              "comment": "Hore.. perda tidak jadi di cabut. Untuk kebakaran hutan yg menyebabkan kabut asap banyak narasi yg beredar penyebabnya adl cukong sawit katanya. Nahh.. dengan perda yg tidak jadi cabut ini.., apa ndak malah senang ini calon2 bos sawit untuk bakar lahan. Bisa di katakan perda ini malah jadi pelindung bos2 sawit yg buka lahan dg hemat alias membakar. 😁",
+              "user_handle": "yansah",
+              "date": "2026-08-27T14:37:50.000Z",
+              "likes": 2,
+              "num_of_replies": 3,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678720614341575442",
+              "comment_id": "7678720614341575442",
+              "user_id": "7102454894074905602"
+            },
+            {
+              "comment": "yang Makse perda tu harus bertanggung jawab dan saling bahu membahu memadamkan kebakaran dimana ada lahan kebakaran harus tolong menolong",
+              "user_handle": "fozan",
+              "date": "2026-08-27T12:07:28.000Z",
+              "likes": 1,
+              "num_of_replies": 0,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678681820401861397",
+              "comment_id": "7678681820401861397",
+              "user_id": "7309617828842767366"
+            },
+            {
+              "comment": "cukup 1 periode",
+              "user_handle": "AGIYA 07",
+              "date": "2026-08-27T16:23:21.000Z",
+              "likes": 1,
+              "num_of_replies": 0,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678747755465442056",
+              "comment_id": "7678747755465442056",
+              "user_id": "7547926042204554248"
+            },
+            {
+              "comment": "plin plan juga bapak ini. waktu ada presiden & mendagri bilangnya mau cabut perda 1/2024, sekarang ngomongnya mau mempertahankan 😂",
+              "user_handle": "Mandala Putra",
+              "date": "2026-08-27T10:57:40.000Z",
+              "likes": 2,
+              "num_of_replies": 0,
+              "comment_url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748?comment_id=7678663861369389831",
+              "comment_id": "7678663861369389831",
+              "user_id": "6566358180498505730"
+            }
+          ],
+          "timestamp": "2026-09-30T16:54:12.822Z",
+          "input": {
+            "url": "https://www.tiktok.com/@hal.kalbar/video/7678594119521897748",
+            "discovery_input": {
+              "search_keyword": "ria norsan",
+              "country": null
+            }
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.tiktok.com/@moodkalbar_/video/7623822256501689607",
+          "post_id": "7623822256501689607",
+          "description": "‎Gubernur Kalimantan Barat, Ria Norsan, menanggapi viralnya video kritikan dari seorang warga terkait jalan rusak di daerah Kecamatan Sepauk, Kabupaten Sintang beberapa waktu lalu. Rabu, 01/04/2026 ‎ ‎Saat ditemui di Balai Petitih Kantor Gubernur Kalbar, ia menyampaikan bahwa sama sekali tidak antik kritik bahkan menyambut baik atas kritikan tersebut. Namun yang amat disayangkan olehnya adalah pengunggah video tersebut dianggap tidak pada tempatnyat dengan menyertakan seoran anak kecil sebagai objek.  ‎ ‎Tak sampai di situ, perihal status jalan di mana titik lokasi yang dimaksud merupakan jalan Kabupaten yang dalam hal ini adalah wewenangnya Bupati setempat. Akan tetapi yang disudutkan adalah Gubernur. ‎ ‎\"Ini salah total. Yang Dikritik mereka adalah jalan Kabupaten, namun yang disudutkan adalah Gubernur. Nah, salah total.\" ujarnya ‎ ‎Ia juga menegaskan bahwa Bupati Sintang, Gregorius Herkulanus Bala, sudah menyampaikan permohonan maaf dan telah berkoordinasi dengan dinas terkait untuk menyelesaikan masalah tersebut.  📕: moodkalbar.com 📍: Kalimantan Barat #moodkalbar \nGubernur Kalimantan Barat menanggapi video viral kritikan jalan rusak di Sintang, menegaskan wewenang jalan kabupaten dan apresiasi kritik yang membangun. #moodkalbar",
+          "create_time": "2026-04-01T16:04:09.000Z",
+          "digg_count": 5777,
+          "share_count": "223",
+          "collect_count": 372,
+          "comment_count": 3116,
+          "play_count": 605400,
+          "video_duration": 48,
+          "hashtags": [
+            "moodkalbar"
+          ],
+          "original_sound": "Mood Kalbar: suara asli - Mood Kalbar",
+          "profile_id": "7355231275698308101",
+          "profile_username": "Mood Kalbar",
+          "profile_url": "https://www.tiktok.com/@moodkalbar_",
+          "profile_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/f72cbe6c4d1ccb69342f1c4bbf4510cf~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=95be6862&x-expires=1790956800&x-signature=%2BYsO8xHXqFltknLZeC0Eb2N1UJ8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
+          "profile_biography": "The Perspective Of Kalimantan Barat\n\n📕: Mau Buku? Cek Story\n📢: Mau Kerjasama? DM\n🙌: Mau Loker? Tanya Gibran",
+          "preview_image": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oISW4ICfgWjoeK1Ti8AVagosTfigyM1omLQAAD~tplv-tiktokx-origin.image?dr=9636&x-expires=1790956800&x-signature=SfFHw5H9DXMYlIhn1OFcCr9xjJo%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8",
+          "post_type": "video",
+          "discovery_input": {
+            "search_keyword": "ria norsan",
+            "country": ""
+          },
+          "offical_item": false,
+          "secu_id": "MS4wLjABAAAA75O77esfhfQw1aPO3HZMIGgdCLScxgycWsadIBPywI1gbTccLhyU-HAwmMNPFgfI",
+          "original_item": false,
+          "shortcode": "7623822256501689607",
+          "width": 576,
+          "ratio": "540p",
+          "video_url": "https://v16-webapp-prime.us.tiktok.com/video/tos/alisg/tos-alisg-ve-0068c800-sg/ogiIVGENwLOulVBnAwfuiCAqQCI0gFMkAq50QC/?a=1988&bti=ODszNWYuMDE6&&bt=946&ft=aEeq8qT0mIoPD1233EMI3wU7m5AbMeF~O5&mime_type=video_mp4&rc=ZmQ6Ojw5ZTk5OThpNzRkOkBpM25wZWo5cmxuOjMzODczNEBhYC5eLl9iXi0xL18tMjAtYSNrY2YuMmRjLzNhLS1kMTFzcw%3D%3D&expire=1790960201&l=20260930165552B2B9FCF5BEBEFB294862&ply_type=2&policy=2&signature=27084518791256109c27847200d634ab&tk=tt_chain_token&btag=e00088000",
+          "music": {
+            "authorname": "Mood Kalbar",
+            "covermedium": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/f72cbe6c4d1ccb69342f1c4bbf4510cf~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=b1dc8ec7&x-expires=1790956800&x-signature=0MskszYZVT8OWy9Fu%2FsZS1YI1tI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
+            "id": "7623822294443379474",
+            "original": true,
+            "playurl": "https://v16m.tiktokcdn-us.com/fe0b81e13b43a6c2ed438812d844e426/6abd93a9/video/tos/alisg/tos-alisg-v-27dcd7/oIDCAE7AHIgz8FlUMQyfGoFfYbAmBJgIapIUCB/?a=1233&bti=ODszNWYuMDE6&&bt=125&ft=GSDrKInz7ThXX54GXq8Zmo&mime_type=audio_mpeg&rc=ajlqM3c5cnluOjMzODU8NEBpajlqM3c5cnluOjMzODU8NEA2b15mMmQ0MDNhLS1kMS1zYSM2b15mMmQ0MDNhLS1kMS1zcw%3D%3D&vvpl=1&l=20260930165552B2B9FCF5BEBEFB294862&btag=e00048000",
+            "title": "suara asli - Mood Kalbar"
+          },
+          "cdn_url": "https://www.tiktok.com/9e757071-1c2b-4b8d-a599-161b60e1cd5e",
+          "is_verified": false,
+          "account_id": "moodkalbar_",
+          "carousel_images": null,
+          "tagged_user": null,
+          "profile_followers": 42200,
+          "tt_chain_token": "mTK4/E+QY6JTZ/knBv/nxw==",
+          "region": "ID",
+          "commerce_info": null,
+          "subtitle_url": "https://v16m-webapp.tiktokcdn-us.com/fee36aa3358d5fd7b5b40a5820311436/6abfe249/video/tos/alisg/tos-alisg-pv-0037/1ad0f62710874a08b1413b52b0a8d9e9/?a=1988&bti=ODszNWYuMDE6&&bt=2319&ft=aEKq_qT0mIoPD1233EMI3wU7m5AbMeF~O5&mime_type=video_mp4&rc=M25wZWo5cmxuOjMzODczNEBpM25wZWo5cmxuOjMzODczNEBrY2YuMmRjLzNhLS1kMTFzYSNrY2YuMmRjLzNhLS1kMTFzcw%3D%3D&l=20260930165552B2B9FCF5BEBEFB294862&btag=e00048000",
+          "subtitle_format": "webvtt",
+          "subtitle_info": [
+            {
+              "url_expire": "1790960201",
+              "size": 1174,
+              "language_id": "2",
+              "language_code_name": "eng-US",
+              "url": "https://v16m-webapp.tiktokcdn-us.com/fee36aa3358d5fd7b5b40a5820311436/6abfe249/video/tos/alisg/tos-alisg-pv-0037/1ad0f62710874a08b1413b52b0a8d9e9/?a=1988&bti=ODszNWYuMDE6&&bt=2319&ft=aEKq_qT0mIoPD1233EMI3wU7m5AbMeF~O5&mime_type=video_mp4&rc=M25wZWo5cmxuOjMzODczNEBpM25wZWo5cmxuOjMzODczNEBrY2YuMmRjLzNhLS1kMTFzYSNrY2YuMmRjLzNhLS1kMTFzcw%3D%3D&l=20260930165552B2B9FCF5BEBEFB294862&btag=e00048000",
+              "format": "webvtt",
+              "version": "4"
+            },
+            {
+              "url_expire": "1790960201",
+              "size": 1208,
+              "language_id": "23",
+              "language_code_name": "ind-ID",
+              "url": "https://v16m-webapp.tiktokcdn-us.com/c26d6ea4bc744c2e64a48156e6c64e84/6abfe249/video/tos/alisg/tos-alisg-pv-0037/dc5930cf256d458da0142a1cbec9cfea/?a=1988&bti=ODszNWYuMDE6&&bt=2319&ft=aEKq_qT0mIoPD1233EMI3wU7m5AbMeF~O5&mime_type=video_mp4&rc=M25wZWo5cmxuOjMzODczNEBpM25wZWo5cmxuOjMzODczNEBrY2YuMmRjLzNhLS1kMTFzYSNrY2YuMmRjLzNhLS1kMTFzcw%3D%3D&l=20260930165552B2B9FCF5BEBEFB294862&btag=e00048000",
+              "format": "webvtt",
+              "version": "1:whisper_lid"
+            }
+          ],
+          "cdn_link": "https://v16-webapp-prime.us.tiktok.com/video/tos/alisg/tos-alisg-ve-37c815-sg/okTICV0uiiACm5QwEIGBqkVnq0QGCw0N2AufAj/?a=1988&bti=ODszNWYuMDE6&&bt=1074&eid=20480&ft=aEeq8qT0mIoPD1233EMI3wU7m5AbMeF~O5&mime_type=video_mp4&rc=OztlNGQ2ZTY7aTdnZ2Q1M0BpM25wZWo5cmxuOjMzODczNEBhNjAxYjQyXi4xYjYxMzUwYSNrY2YuMmRjLzNhLS1kMTFzcw%3D%3D&expire=1790960201&l=20260930165552B2B9FCF5BEBEFB294862&ply_type=2&policy=2&signature=4e854c4b6517796ac2187b46f08ac1aa&tk=tt_chain_token&btag=e00088000",
+          "num_share_count": 223,
+          "comments": [],
+          "timestamp": "2026-09-30T16:56:40.250Z",
+          "input": {
+            "url": "https://www.tiktok.com/@moodkalbar_/video/7623822256501689607",
+            "discovery_input": {
+              "search_keyword": "ria norsan",
+              "country": null
+            }
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "meta": {
+    "templateId": "5153",
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "bB3wW9g2WVJZvpJc",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-21T08:12:02.285Z",
+      "updatedAt": "2026-09-21T08:12:02.285Z"
+    }
+  ],
+  "activeVersion": null
+}
