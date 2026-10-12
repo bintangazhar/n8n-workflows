@@ -1,0 +1,433 @@
+{
+  "id": "QyXudfRD1K9FzZoe",
+  "name": "SW - Calendar Agent",
+  "description": null,
+  "active": true,
+  "activeVersionId": "dc9a3498-1896-4be1-9c6b-a5bac9a30e51",
+  "createdAt": "2026-09-09T15:30:31.738Z",
+  "updatedAt": "2026-09-11T22:43:03.424Z",
+  "isArchived": false,
+  "versionId": "dc9a3498-1896-4be1-9c6b-a5bac9a30e51",
+  "versionCounter": 30,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatId"
+            },
+            {
+              "name": "userText"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "02199e59-8963-4279-9de4-a371bce04fe9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userText }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=Calendar assistant. Now: {{ $now }} ({{ $today.format('dd MMMM yyyy') }}).\n\nUse calendar MCP tools to check/create/update/delete events. Never ask for event IDs, look them up yourself first.\n\nGet many events defaults to the next 7 days only. For anything outside that (specific date, \"bulan ini\", \"minggu depan\", birthdays), always set Time_Min/Time_Max (ISO 8601) covering the exact period asked.\n\nBirthdays auto-synced from Google Contacts live in a separate read-only Birthdays calendar, not personal, unless the user added them manually. For any birthday question, search Birthdays calendar too with the right range.\n\nCalendar picks when creating: personal (hangout/coffee/leisure/birthday), education (learning), work (professional). Birthdays calendar itself is read-only.\n\nMerge multi-calendar results into one \"-\" list sorted by time. Reply in user's language (default Indonesian), under 200 words, Telegram Markdown (*bold*, _italic_), not HTML tags."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        -32
+      ],
+      "id": "32544f11-ff1f-4737-9d1d-f4a4f9b1131c",
+      "name": "Calendar Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        176
+      ],
+      "id": "254fac53-aebf-4170-9fdc-3f50f97b44a5",
+      "name": "Gemini Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QVYkHlJCbUcVHNDj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://n8n.bintang.me/mcp/calendar",
+        "serverTransport": "httpStreamable",
+        "options": {},
+        "notes": "Replace this endpointUrl once your calendar MCP server is ready. The node is deliberately left ACTIVE (not disabled) so it starts working the moment the endpoint is valid."
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        208
+      ],
+      "id": "0cedaeee-3c38-4963-a74c-d8b787f4017a",
+      "name": "MCP Client - Calendar",
+      "notes": "Ganti endpointUrl ini setelah MCP server calendar kamu jadi. Node sengaja dibuat AKTIF (tidak disabled) supaya begitu endpoint valid, langsung jalan."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "message",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        0
+      ],
+      "id": "dc20a421-4d34-4c28-9ff2-476591ea3ac1",
+      "name": "Build Result"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        192,
+        192
+      ],
+      "id": "13c0bf96-70f5-4c1b-9d6e-27c007079344",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "x8Y8moQ8hdkRDNGG",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "main": [
+        [
+          {
+            "node": "Build Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client - Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "QyXudfRD1K9FzZoe",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-09T15:30:31.738Z",
+      "updatedAt": "2026-09-09T15:30:31.738Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "dc9a3498-1896-4be1-9c6b-a5bac9a30e51",
+    "workflowId": "QyXudfRD1K9FzZoe",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chatId"
+              },
+              {
+                "name": "userText"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -32,
+          0
+        ],
+        "id": "02199e59-8963-4279-9de4-a371bce04fe9",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.userText }}",
+          "needsFallback": true,
+          "options": {
+            "systemMessage": "=Calendar assistant. Now: {{ $now }} ({{ $today.format('dd MMMM yyyy') }}).\n\nUse calendar MCP tools to check/create/update/delete events. Never ask for event IDs, look them up yourself first.\n\nGet many events defaults to the next 7 days only. For anything outside that (specific date, \"bulan ini\", \"minggu depan\", birthdays), always set Time_Min/Time_Max (ISO 8601) covering the exact period asked.\n\nBirthdays auto-synced from Google Contacts live in a separate read-only Birthdays calendar, not personal, unless the user added them manually. For any birthday question, search Birthdays calendar too with the right range.\n\nCalendar picks when creating: personal (hangout/coffee/leisure/birthday), education (learning), work (professional). Birthdays calendar itself is read-only.\n\nMerge multi-calendar results into one \"-\" list sorted by time. Reply in user's language (default Indonesian), under 200 words, Telegram Markdown (*bold*, _italic_), not HTML tags."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2.2,
+        "position": [
+          176,
+          -32
+        ],
+        "id": "32544f11-ff1f-4737-9d1d-f4a4f9b1131c",
+        "name": "Calendar Agent"
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-3.1-flash-lite",
+          "options": {
+            "temperature": 0.2
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          64,
+          176
+        ],
+        "id": "254fac53-aebf-4170-9fdc-3f50f97b44a5",
+        "name": "Gemini Model",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "QVYkHlJCbUcVHNDj",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "endpointUrl": "https://n8n.bintang.me/mcp/calendar",
+          "serverTransport": "httpStreamable",
+          "options": {},
+          "notes": "Replace this endpointUrl once your calendar MCP server is ready. The node is deliberately left ACTIVE (not disabled) so it starts working the moment the endpoint is valid."
+        },
+        "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+        "typeVersion": 1.1,
+        "position": [
+          480,
+          208
+        ],
+        "id": "0cedaeee-3c38-4963-a74c-d8b787f4017a",
+        "name": "MCP Client - Calendar",
+        "notes": "Ganti endpointUrl ini setelah MCP server calendar kamu jadi. Node sengaja dibuat AKTIF (tidak disabled) supaya begitu endpoint valid, langsung jalan."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1",
+                "name": "message",
+                "value": "={{ $json.output }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          496,
+          0
+        ],
+        "id": "dc20a421-4d34-4c28-9ff2-476591ea3ac1",
+        "name": "Build Result"
+      },
+      {
+        "parameters": {
+          "model": "qwen/qwen3.8-27b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+        "typeVersion": 1,
+        "position": [
+          192,
+          192
+        ],
+        "id": "13c0bf96-70f5-4c1b-9d6e-27c007079344",
+        "name": "Groq Chat Model",
+        "credentials": {
+          "groqApi": {
+            "id": "x8Y8moQ8hdkRDNGG",
+            "name": "Groq account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Calendar Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calendar Agent": {
+        "main": [
+          [
+            {
+              "node": "Build Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gemini Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Calendar Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MCP Client - Calendar": {
+        "ai_tool": [
+          [
+            {
+              "node": "Calendar Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Groq Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Calendar Agent",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar (via MCP)",
+    "name": "Translate node note to English",
+    "description": "Dev note on MCP Client - Calendar node was in Indonesian; translated. No functional change.",
+    "autosaved": false,
+    "createdAt": "2026-09-11T22:43:03.425Z",
+    "updatedAt": "2026-09-11T22:43:03.425Z",
+    "workflowPublishHistory": [
+      {
+        "id": 187,
+        "workflowId": "QyXudfRD1K9FzZoe",
+        "versionId": "dc9a3498-1896-4be1-9c6b-a5bac9a30e51",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-11T22:43:31.297Z"
+      }
+    ]
+  }
+}
