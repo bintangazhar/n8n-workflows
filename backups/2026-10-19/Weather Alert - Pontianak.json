@@ -1,0 +1,439 @@
+{
+  "id": "yTOzPmaxR4P8yxFV",
+  "name": "Weather Alert - Pontianak",
+  "description": "Cek cuaca Pontianak setiap jam, kirim alert Telegram jika potensi hujan ≥60% dalam 3 jam ke depan",
+  "active": true,
+  "activeVersionId": "7d862875-f760-446f-b2b2-26ece80a06d2",
+  "createdAt": "2026-10-01T18:31:55.886Z",
+  "updatedAt": "2026-10-01T18:39:09.120Z",
+  "isArchived": false,
+  "versionId": "7d862875-f760-446f-b2b2-26ece80a06d2",
+  "versionCounter": 7,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "64764205-b726-4df1-9b72-2f025603d764",
+      "name": "Check Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "-0.0353948"
+            },
+            {
+              "name": "longitude",
+              "value": "109.2491484"
+            },
+            {
+              "name": "hourly",
+              "value": "precipitation_probability,precipitation"
+            },
+            {
+              "name": "timezone",
+              "value": "Asia/Jakarta"
+            },
+            {
+              "name": "forecast_days",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cec98d7c-b546-40f4-9eb2-48696d3eb7cd",
+      "name": "Get Weather Forecast",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst now = new Date();\nconst threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);\n\nconst hourly = data.hourly;\nconst times = hourly.time.map(t => new Date(t));\n\nlet maxRainProb = 0;\nlet rainHours = [];\n\nfor (let i = 0; i < times.length; i++) {\n  if (times[i] >= now && times[i] <= threeHoursLater) {\n    const prob = hourly.precipitation_probability[i] || 0;\n    if (prob > maxRainProb) maxRainProb = prob;\n    if (prob >= 60) {\n      rainHours.push({\n        time: times[i].toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),\n        probability: prob\n      });\n    }\n  }\n}\n\nreturn [{\n  json: {\n    hasHighRainRisk: maxRainProb >= 60,\n    maxProbability: maxRainProb,\n    rainHours: rainHours,\n    location: \"Pontianak\"\n  }\n}];"
+      },
+      "id": "243a1271-b84d-433e-a213-c84ce5956c98",
+      "name": "Check Rain Probability",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.hasHighRainRisk }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              },
+              "id": "9a080f07-642e-4b85-a63f-2fcb7b9f02b9"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1ecf8e4d-e4bc-4db6-949c-26811b005e82",
+      "name": "High Rain Risk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6257097742",
+        "text": "=\"🌧️ *Peringatan Hujan - \" + $json.location + \"*\\n\\nPotensi hujan tinggi dalam 3 jam ke depan!\\nProbabilitas tertinggi: *\" + $json.maxProbability + \"%*\\n\\n\" + $json.rainHours.map(h => \"• \" + h.time + \" WIB - \" + h.probability + \"%\").join(\"\\n\") + \"\\n\\n_Bawa payung ya!_ ☔\"",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "32787de0-d9c8-45b8-8972-86220eb0a893",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        -64
+      ],
+      "webhookId": "67f25e43-f968-41c4-b43e-fc0fd136489a",
+      "credentials": {
+        "telegramApi": {
+          "id": "FCs9b4W4W7p0RIfm",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Check Every Hour": {
+      "main": [
+        [
+          {
+            "node": "Get Weather Forecast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather Forecast": {
+      "main": [
+        [
+          {
+            "node": "Check Rain Probability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Rain Probability": {
+      "main": [
+        [
+          {
+            "node": "High Rain Risk?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert": {
+      "main": [
+        []
+      ]
+    },
+    "High Rain Risk?": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Check Every Hour": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "yTOzPmaxR4P8yxFV",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-10-01T18:31:55.886Z",
+      "updatedAt": "2026-10-01T18:31:55.886Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "7d862875-f760-446f-b2b2-26ece80a06d2",
+    "workflowId": "yTOzPmaxR4P8yxFV",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours"
+              }
+            ]
+          }
+        },
+        "id": "64764205-b726-4df1-9b72-2f025603d764",
+        "name": "Check Every Hour",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://api.open-meteo.com/v1/forecast",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "latitude",
+                "value": "-0.0353948"
+              },
+              {
+                "name": "longitude",
+                "value": "109.2491484"
+              },
+              {
+                "name": "hourly",
+                "value": "precipitation_probability,precipitation"
+              },
+              {
+                "name": "timezone",
+                "value": "Asia/Jakarta"
+              },
+              {
+                "name": "forecast_days",
+                "value": "1"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "cec98d7c-b546-40f4-9eb2-48696d3eb7cd",
+        "name": "Get Weather Forecast",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          448,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const data = $input.first().json;\nconst now = new Date();\nconst threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);\n\nconst hourly = data.hourly;\nconst times = hourly.time.map(t => new Date(t));\n\nlet maxRainProb = 0;\nlet rainHours = [];\n\nfor (let i = 0; i < times.length; i++) {\n  if (times[i] >= now && times[i] <= threeHoursLater) {\n    const prob = hourly.precipitation_probability[i] || 0;\n    if (prob > maxRainProb) maxRainProb = prob;\n    if (prob >= 60) {\n      rainHours.push({\n        time: times[i].toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),\n        probability: prob\n      });\n    }\n  }\n}\n\nreturn [{\n  json: {\n    hasHighRainRisk: maxRainProb >= 60,\n    maxProbability: maxRainProb,\n    rainHours: rainHours,\n    location: \"Pontianak\"\n  }\n}];"
+        },
+        "id": "243a1271-b84d-433e-a213-c84ce5956c98",
+        "name": "Check Rain Probability",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.hasHighRainRisk }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true"
+                },
+                "id": "9a080f07-642e-4b85-a63f-2fcb7b9f02b9"
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "1ecf8e4d-e4bc-4db6-949c-26811b005e82",
+        "name": "High Rain Risk?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "6257097742",
+          "text": "=\"🌧️ *Peringatan Hujan - \" + $json.location + \"*\\n\\nPotensi hujan tinggi dalam 3 jam ke depan!\\nProbabilitas tertinggi: *\" + $json.maxProbability + \"%*\\n\\n\" + $json.rainHours.map(h => \"• \" + h.time + \" WIB - \" + h.probability + \"%\").join(\"\\n\") + \"\\n\\n_Bawa payung ya!_ ☔\"",
+          "additionalFields": {
+            "parse_mode": "Markdown"
+          }
+        },
+        "id": "32787de0-d9c8-45b8-8972-86220eb0a893",
+        "name": "Send Alert",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1104,
+          -64
+        ],
+        "webhookId": "67f25e43-f968-41c4-b43e-fc0fd136489a",
+        "credentials": {
+          "telegramApi": {
+            "id": "FCs9b4W4W7p0RIfm",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Check Every Hour": {
+        "main": [
+          [
+            {
+              "node": "Get Weather Forecast",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Weather Forecast": {
+        "main": [
+          [
+            {
+              "node": "Check Rain Probability",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Rain Probability": {
+        "main": [
+          [
+            {
+              "node": "High Rain Risk?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Alert": {
+        "main": [
+          []
+        ]
+      },
+      "High Rain Risk?": {
+        "main": [
+          [
+            {
+              "node": "Send Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Bintang Azhar",
+    "name": "Version 7d862875",
+    "description": "",
+    "autosaved": true,
+    "createdAt": "2026-10-01T18:39:09.121Z",
+    "updatedAt": "2026-10-01T18:39:19.858Z",
+    "workflowPublishHistory": [
+      {
+        "id": 242,
+        "workflowId": "yTOzPmaxR4P8yxFV",
+        "versionId": "7d862875-f760-446f-b2b2-26ece80a06d2",
+        "event": "activated",
+        "userId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-10-01T18:39:19.846Z"
+      }
+    ]
+  }
+}
