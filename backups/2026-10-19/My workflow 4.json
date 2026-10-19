@@ -1,0 +1,73 @@
+{
+  "id": "cfFAs20O4sI9rNiK",
+  "name": "My workflow 4",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-19T10:19:43.281Z",
+  "updatedAt": "2026-09-19T10:29:18.998Z",
+  "isArchived": false,
+  "versionId": "1c668267-245d-4a01-a090-54d391ada22c",
+  "versionCounter": 5,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "actorId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "@apify/n8n-nodes-apify.apifyTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "722a6395-fcca-42bc-9b76-73d635fc14ab",
+      "name": "Apify Trigger",
+      "webhookId": "8abfd781-2849-4d0b-aac7-9cefe67248c4",
+      "credentials": {
+        "apifyApi": {
+          "id": "Ho7sQZzCbjyDQQhT",
+          "name": "Apify account"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "cfFAs20O4sI9rNiK",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-19T10:19:43.281Z",
+      "updatedAt": "2026-09-19T10:19:43.281Z"
+    }
+  ],
+  "activeVersion": null
+}
