@@ -1,0 +1,791 @@
+{
+  "id": "bB3wW9g2WVJZvpJc",
+  "name": "TikTok post scraper via keywords | Bright Data + Sheets integration",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-09-21T08:12:02.285Z",
+  "updatedAt": "2026-10-05T14:29:01.608Z",
+  "isArchived": false,
+  "versionId": "657654a8-70c5-4579-b11f-4b00aeb0b131",
+  "versionCounter": 53,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://api.brightdata.com/datasets/v3/snapshot/{{ $json.snapshot_id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "format",
+              "value": "json"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ba515dd2-0150-492c-8ca0-83ba6c92ceb1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d2a4bef-7b12-4d2c-bb0e-d06b599b82b4",
+      "name": "Decode Snapshot from Response1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2560,
+        944
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "5568e3e0-fe0a-483b-89a2-c1922638a4fc",
+      "name": "Wait 1 minute1",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1920,
+        960
+      ],
+      "webhookId": "10b45556-5e91-4387-abd0-f9078b220286",
+      "typeVersion": 1.1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "formTitle": "TikTok ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Keyword"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6393981d-85ae-4a47-8d05-e427f4443ef3",
+      "name": "Accepts keyword input from the user.1",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        896,
+        944
+      ],
+      "webhookId": "d6b1e0e3-e8bb-4662-a9e2-529fb619bcf6",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brightdata.com/datasets/v3/trigger",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "dataset_id",
+              "value": "gd_lu702nij2f790tmv9h"
+            },
+            {
+              "name": "include_errors",
+              "value": "true"
+            },
+            {
+              "name": "type",
+              "value": "discover_new"
+            },
+            {
+              "name": "discover_by",
+              "value": "keyword"
+            },
+            {
+              "name": "limit_per_input",
+              "value": "20"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ba515dd2-0150-492c-8ca0-83ba6c92ceb1"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=[\n  {\n    \"search_keyword\": \"{{ $json.Keyword }}\",\n    \"country\": \"\"\n  }\n]",
+        "options": {}
+      },
+      "id": "f5fb4e76-a0f5-4700-8416-2dcb46969dc4",
+      "name": "Sends keyword to Bright Data's Discover API to start scraping.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1200,
+        960
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://api.brightdata.com/datasets/v3/progress/{{ $json.snapshot_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ba515dd2-0150-492c-8ca0-83ba6c92ceb1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b67d12fb-2a7a-44d7-8cbe-503fb18f59ed",
+      "name": "Checks the scraping status using snapshot ID.1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1584,
+        960
+      ],
+      "typeVersion": 4.2,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "🟥 1. Form Trigger Node\n📌 Purpose:\n\nUser submits a keyword input.\n\nThis starts the scraping process.\n\n",
+        "height": 340,
+        "width": 280,
+        "color": 3
+      },
+      "id": "c2093990-46cf-484a-bc0f-b80f81fb4479",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟩 2. HTTP Request (Trigger Scraping on Bright Data)\n🔗 POST to Bright Data\n\nSends the keyword to Bright Data.\n\nTriggers scraping using dataset ID.\n\nTikTok keyword-based discovery initiated.\n\n",
+        "height": 420,
+        "width": 340,
+        "color": 4
+      },
+      "id": "4a876ba2-ff95-44d4-8cf8-5317a6dd8617",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1104,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟦 3. Snapshot Progress Check\n🔍 GET - snapshot status\n\nFetches the current snapshot_id.\n\nChecks if the scraping task is finished (status == ready).",
+        "height": 360,
+        "width": 320,
+        "color": 5
+      },
+      "id": "5444b52f-af83-46e3-94fe-e3e13f797a79",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1488,
+        800
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟪 4. IF Node (Check Completion)\n📌 Condition:\n\nIf snapshot is ready → move forward.\n\nElse → wait and retry.",
+        "height": 360,
+        "width": 260,
+        "color": 2
+      },
+      "id": "9c6b8318-c25c-45e2-80d0-6d55abef0b3d",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2144,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "35ed620d-b5d5-4e97-bcc5-52b283d85616",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "77738a96-8181-4ff5-962a-67965272f011",
+      "name": "Check Final Status1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2224,
+        960
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "🟥 5. Wait Node\n🕒 Delays by 1 minute\n\nIf snapshot is not ready, pause for 1 minute.\n\nThen return to recheck loop.",
+        "height": 380,
+        "width": 280,
+        "color": 6
+      },
+      "id": "e0fa74d3-d41c-4afc-a7ab-474be354b85d",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1824,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🟨 6. Final Data Storage\n📌 Google Sheets Integration:\n\nStores extracted TikTok data.\n\nIncludes all post metrics and profile info.\n\n",
+        "height": 380,
+        "width": 300,
+        "color": 3
+      },
+      "id": "165e8ab5-4075-48d3-adc7-155a43df7142",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2832,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1PQOoA8ra9jwswkxNz0xG5hvTV94kwtNIMTiVWnG2kNo",
+          "mode": "list",
+          "cachedResultName": "Media Monitoring - Sentiment Analysis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PQOoA8ra9jwswkxNz0xG5hvTV94kwtNIMTiVWnG2kNo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Tiktok by keyword",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PQOoA8ra9jwswkxNz0xG5hvTV94kwtNIMTiVWnG2kNo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json.url }}",
+            "ratio": "={{ $json.ratio }}",
+            "width": "={{ $json.width }}",
+            "post_id": "={{ $json.post_id }}",
+            "secu_id": "={{ $json.secu_id }}",
+            "hashtags": "={{ $json.hashtags }}",
+            "post_type": "={{ $json.post_type }}",
+            "shortcode": "={{ $json.shortcode }}",
+            "digg_count": "={{ $json.digg_count }}",
+            "play_count": "={{ $json.play_count }}",
+            "profile_id": "={{ $json.profile_id }}",
+            "create_time": "={{ $json.create_time }}",
+            "description": "={{ $json.description }}",
+            "profile_url": "={{ $json.profile_url }}",
+            "share_count": "={{ $json.share_count }}",
+            "offical_item": "={{ $json.offical_item }}",
+            "collect_count": "={{ $json.collect_count }}",
+            "comment_count": "={{ $json.comment_count }}",
+            "original_item": "={{ $json.original_item }}",
+            "preview_image": "={{ $json.preview_image }}",
+            "original_sound": "={{ $json.original_sound }}",
+            "profile_avatar": "={{ $json.profile_avatar }}",
+            "video_duration": "={{ $json.video_duration }}",
+            "discovery_input": "={{ $json.discovery_input }}",
+            "profile_username": "={{ $json.profile_username }}",
+            "profile_biography": "={{ $json.profile_biography }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "create_time",
+              "displayName": "create_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "digg_count",
+              "displayName": "digg_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "share_count",
+              "displayName": "share_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "collect_count",
+              "displayName": "collect_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_duration",
+              "displayName": "video_duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_sound",
+              "displayName": "original_sound",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_id",
+              "displayName": "profile_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_username",
+              "displayName": "profile_username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_url",
+              "displayName": "profile_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_avatar",
+              "displayName": "profile_avatar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "profile_biography",
+              "displayName": "profile_biography",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preview_image",
+              "displayName": "preview_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "post_type",
+              "displayName": "post_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_input",
+              "displayName": "discovery_input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "offical_item",
+              "displayName": "offical_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "secu_id",
+              "displayName": "secu_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_item",
+              "displayName": "original_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "width",
+              "displayName": "width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ratio",
+              "displayName": "ratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0735562f-e3d5-4327-83f3-3f7f434d34ef",
+      "name": "Google Sheets1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2960,
+        944
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7k6H6iPtMGHICq5n",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Decode Snapshot from Response1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 minute1": {
+      "main": [
+        [
+          {
+            "node": "Check Final Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepts keyword input from the user.1": {
+      "main": [
+        [
+          {
+            "node": "Sends keyword to Bright Data's Discover API to start scraping.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sends keyword to Bright Data's Discover API to start scraping.1": {
+      "main": [
+        [
+          {
+            "node": "Checks the scraping status using snapshot ID.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checks the scraping status using snapshot ID.1": {
+      "main": [
+        [
+          {
+            "node": "Wait 1 minute1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Final Status1": {
+      "main": [
+        [
+          {
+            "node": "Decode Snapshot from Response1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Checks the scraping status using snapshot ID.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "pinData": {
+    "Accepts keyword input from the user.1": [
+      {
+        "json": {
+          "Keyword": "ria norsan",
+          "submittedAt": "2026-09-30T22:47:46.288+07:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Checks the scraping status using snapshot ID.1": [
+      {
+        "json": {
+          "status": "ready",
+          "snapshot_id": "sd_muvc7ifj2m4kdpoese",
+          "dataset_id": "gd_lu702nij2f790tmv9h",
+          "records": 20,
+          "errors": 0,
+          "collection_duration": 283928,
+          "avg_duration_per_input": 283928
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Sends keyword to Bright Data's Discover API to start scraping.1": [
+      {
+        "json": {
+          "snapshot_id": "sd_muvc7ifj2m4kdpoese"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Wait 1 minute1": [
+      {
+        "json": {
+          "status": "ready",
+          "snapshot_id": "sd_muvc7ifj2m4kdpoese",
+          "dataset_id": "gd_lu702nij2f790tmv9h",
+          "records": 20,
+          "errors": 0,
+          "collection_duration": 283928,
+          "avg_duration_per_input": 283928
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "meta": {
+    "templateId": "5153",
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "bB3wW9g2WVJZvpJc",
+      "projectId": "dDwqfrgyv5v0sxdj",
+      "project": {
+        "id": "dDwqfrgyv5v0sxdj",
+        "name": "Bintang Azhar <bintang@bintang.me>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "3402167f-f44e-4535-989e-9ced53d5bf78",
+        "createdAt": "2026-09-09T13:28:48.298Z",
+        "updatedAt": "2026-09-09T13:31:23.377Z"
+      },
+      "createdAt": "2026-09-21T08:12:02.285Z",
+      "updatedAt": "2026-09-21T08:12:02.285Z"
+    }
+  ],
+  "activeVersion": null
+}
